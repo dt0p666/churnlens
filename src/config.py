@@ -15,7 +15,7 @@ class ProjectConfig:
     TARGET_COL: str = "Churn Value"
     ID_COL: str = "CustomerID"
     
-    # Columns to strictly drop to prevent target leakage and zero-variance noise
+    # Columns strictly dropped to prevent target leakage and zero-variance noise
     DROP_COLS: List[str] = field(default_factory=lambda: [
         "CustomerID",
         "Count",
@@ -59,9 +59,13 @@ class ProjectConfig:
     
     # Additional engineered feature columns created during pipeline transformation
     ENGINEERED_NUMERICAL_COLS: List[str] = field(default_factory=lambda: [
-        "NumServices",
+        "ServiceCount",
         "AvgMonthlyCharges",
         "ChargeDiffRatio"
+    ])
+    
+    ENGINEERED_CATEGORICAL_COLS: List[str] = field(default_factory=lambda: [
+        "TenureGroup"
     ])
     
     DEFAULT_THRESHOLD: float = 0.35

@@ -10,11 +10,12 @@ def test_feature_engineer_transformation():
     transformer = TelcoFeatureEngineer()
     df_out = transformer.transform(df)
 
-    assert "NumServices" in df_out.columns
+    assert "ServiceCount" in df_out.columns
+    assert "TenureGroup" in df_out.columns
     assert "AvgMonthlyCharges" in df_out.columns
     assert "ChargeDiffRatio" in df_out.columns
-    # Check that services count is numeric and accurate
-    assert df_out["NumServices"].iloc[0] >= 0
+    # Check that services count is numeric and non-negative
+    assert df_out["ServiceCount"].iloc[0] >= 0
 
 def test_pipeline_transform_shape():
     df = pd.DataFrame([SAMPLE_HIGH_RISK_CUSTOMER, SAMPLE_HIGH_RISK_CUSTOMER])

@@ -1,174 +1,190 @@
 [
   {
     "feature": "Contract_Month-to-month",
-    "importance": 0.29182
+    "importance": 0.27236
   },
   {
     "feature": "Online Security_No",
-    "importance": 0.08635
+    "importance": 0.09948
   },
   {
     "feature": "Internet Service_Fiber optic",
-    "importance": 0.08222
-  },
-  {
-    "feature": "Contract_Two year",
-    "importance": 0.05497
-  },
-  {
-    "feature": "Internet Service_DSL",
-    "importance": 0.05123
-  },
-  {
-    "feature": "Tech Support_No",
-    "importance": 0.03716
-  },
-  {
-    "feature": "Dependents_No",
-    "importance": 0.03658
-  },
-  {
-    "feature": "Phone Service_Yes",
-    "importance": 0.03255
-  },
-  {
-    "feature": "Contract_One year",
-    "importance": 0.02137
-  },
-  {
-    "feature": "Payment Method_Electronic check",
-    "importance": 0.0205
+    "importance": 0.07892
   },
   {
     "feature": "Dependents_Yes",
-    "importance": 0.02049
+    "importance": 0.03971
+  },
+  {
+    "feature": "Tech Support_No",
+    "importance": 0.03862
+  },
+  {
+    "feature": "Contract_Two year",
+    "importance": 0.03736
+  },
+  {
+    "feature": "Dependents_No",
+    "importance": 0.03484
+  },
+  {
+    "feature": "Internet Service_DSL",
+    "importance": 0.03386
+  },
+  {
+    "feature": "TenureGroup_0-12m",
+    "importance": 0.02704
+  },
+  {
+    "feature": "Contract_One year",
+    "importance": 0.02376
   },
   {
     "feature": "Streaming Movies_Yes",
-    "importance": 0.0199
+    "importance": 0.02364
+  },
+  {
+    "feature": "Payment Method_Electronic check",
+    "importance": 0.02234
   },
   {
     "feature": "Tenure Months",
-    "importance": 0.01884
-  },
-  {
-    "feature": "Phone Service_No",
-    "importance": 0.01193
-  },
-  {
-    "feature": "Streaming TV_Yes",
-    "importance": 0.01057
-  },
-  {
-    "feature": "Monthly Charges",
-    "importance": 0.01047
-  },
-  {
-    "feature": "Paperless Billing_No",
-    "importance": 0.00983
-  },
-  {
-    "feature": "Total Charges",
-    "importance": 0.00972
-  },
-  {
-    "feature": "Online Backup_No",
-    "importance": 0.00938
-  },
-  {
-    "feature": "NumServices",
-    "importance": 0.00926
-  },
-  {
-    "feature": "Online Security_Yes",
-    "importance": 0.00917
-  },
-  {
-    "feature": "Streaming TV_No",
-    "importance": 0.00894
-  },
-  {
-    "feature": "Multiple Lines_Yes",
-    "importance": 0.0088
-  },
-  {
-    "feature": "AvgMonthlyCharges",
-    "importance": 0.00879
-  },
-  {
-    "feature": "Online Backup_Yes",
-    "importance": 0.00863
-  },
-  {
-    "feature": "Partner_Yes",
-    "importance": 0.0086
-  },
-  {
-    "feature": "Partner_No",
-    "importance": 0.00853
-  },
-  {
-    "feature": "ChargeDiffRatio",
-    "importance": 0.00784
-  },
-  {
-    "feature": "Paperless Billing_Yes",
-    "importance": 0.00781
-  },
-  {
-    "feature": "Device Protection_Yes",
-    "importance": 0.00751
-  },
-  {
-    "feature": "Gender_Female",
-    "importance": 0.00711
-  },
-  {
-    "feature": "Payment Method_Bank transfer (automatic)",
-    "importance": 0.00707
-  },
-  {
-    "feature": "Streaming Movies_No",
-    "importance": 0.00688
-  },
-  {
-    "feature": "Multiple Lines_No",
-    "importance": 0.0068
-  },
-  {
-    "feature": "Payment Method_Mailed check",
-    "importance": 0.00641
-  },
-  {
-    "feature": "Tech Support_Yes",
-    "importance": 0.00635
-  },
-  {
-    "feature": "Senior Citizen_No",
-    "importance": 0.00616
-  },
-  {
-    "feature": "Payment Method_Credit card (automatic)",
-    "importance": 0.00602
-  },
-  {
-    "feature": "Gender_Male",
-    "importance": 0.00597
-  },
-  {
-    "feature": "Senior Citizen_Yes",
-    "importance": 0.00593
-  },
-  {
-    "feature": "Device Protection_No",
-    "importance": 0.00556
-  },
-  {
-    "feature": "Multiple Lines_No phone service",
-    "importance": 0.0
+    "importance": 0.01643
   },
   {
     "feature": "Internet Service_No",
+    "importance": 0.01386
+  },
+  {
+    "feature": "Paperless Billing_No",
+    "importance": 0.01093
+  },
+  {
+    "feature": "Multiple Lines_Yes",
+    "importance": 0.01032
+  },
+  {
+    "feature": "Total Charges",
+    "importance": 0.01019
+  },
+  {
+    "feature": "Online Backup_No",
+    "importance": 0.00981
+  },
+  {
+    "feature": "Partner_No",
+    "importance": 0.00969
+  },
+  {
+    "feature": "Gender_Male",
+    "importance": 0.0094
+  },
+  {
+    "feature": "Monthly Charges",
+    "importance": 0.00913
+  },
+  {
+    "feature": "Online Backup_Yes",
+    "importance": 0.00895
+  },
+  {
+    "feature": "Phone Service_No",
+    "importance": 0.00893
+  },
+  {
+    "feature": "ServiceCount",
+    "importance": 0.00849
+  },
+  {
+    "feature": "AvgMonthlyCharges",
+    "importance": 0.00846
+  },
+  {
+    "feature": "Multiple Lines_No",
+    "importance": 0.00835
+  },
+  {
+    "feature": "Streaming TV_Yes",
+    "importance": 0.00829
+  },
+  {
+    "feature": "Tech Support_Yes",
+    "importance": 0.00787
+  },
+  {
+    "feature": "TenureGroup_49-60m",
+    "importance": 0.0078
+  },
+  {
+    "feature": "TenureGroup_25-48m",
+    "importance": 0.00773
+  },
+  {
+    "feature": "ChargeDiffRatio",
+    "importance": 0.00756
+  },
+  {
+    "feature": "Payment Method_Mailed check",
+    "importance": 0.00734
+  },
+  {
+    "feature": "Senior Citizen_No",
+    "importance": 0.00712
+  },
+  {
+    "feature": "Streaming Movies_No",
+    "importance": 0.00707
+  },
+  {
+    "feature": "Streaming TV_No",
+    "importance": 0.00699
+  },
+  {
+    "feature": "Paperless Billing_Yes",
+    "importance": 0.00689
+  },
+  {
+    "feature": "TenureGroup_13-24m",
+    "importance": 0.00676
+  },
+  {
+    "feature": "Senior Citizen_Yes",
+    "importance": 0.00662
+  },
+  {
+    "feature": "Partner_Yes",
+    "importance": 0.00647
+  },
+  {
+    "feature": "Payment Method_Bank transfer (automatic)",
+    "importance": 0.00615
+  },
+  {
+    "feature": "Gender_Female",
+    "importance": 0.0056
+  },
+  {
+    "feature": "Payment Method_Credit card (automatic)",
+    "importance": 0.00545
+  },
+  {
+    "feature": "Device Protection_No",
+    "importance": 0.00481
+  },
+  {
+    "feature": "Device Protection_Yes",
+    "importance": 0.00473
+  },
+  {
+    "feature": "Online Security_Yes",
+    "importance": 0.00388
+  },
+  {
+    "feature": "Phone Service_Yes",
+    "importance": 0.0
+  },
+  {
+    "feature": "Multiple Lines_No phone service",
     "importance": 0.0
   },
   {
@@ -193,6 +209,10 @@
   },
   {
     "feature": "Streaming Movies_No internet service",
+    "importance": 0.0
+  },
+  {
+    "feature": "TenureGroup_61-72m+",
     "importance": 0.0
   }
 ]

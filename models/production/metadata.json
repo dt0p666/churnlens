@@ -1,173 +1,266 @@
 {
   "model_name": "XGBoost",
   "model_version": "v1.0.0",
-  "training_timestamp": "2026-10-03T06:04:46.372200Z",
+  "training_timestamp": "2026-10-03T09:23:21.066515+00:00",
   "dataset_metadata": {
     "dataset_rows": 7043,
     "dataset_cols": 33,
     "data_hash": "e984530b5b1c67a0f2abe6496e65b99ab8d163d7e1b4c83fc1c3e2d71db57a34",
+    "churn_count": 1869,
     "churn_rate": 0.2653698707936959,
     "features_count": 19
   },
   "cv_results": {
     "LogisticRegression": {
-      "cv_roc_auc_mean": 0.8583125515734326,
-      "cv_roc_auc_std": 0.012496972386700275
+      "cv_roc_auc_mean": 0.8590048822605288,
+      "cv_roc_auc_std": 0.01198118293897696,
+      "cv_pr_auc_mean": 0.6828797427031787,
+      "cv_f1_mean": 0.6423488894400314,
+      "cv_precision_mean": 0.5321800189274553,
+      "cv_recall_mean": 0.8107023411371237
     },
     "RandomForest": {
-      "cv_roc_auc_mean": 0.8614087158375737,
-      "cv_roc_auc_std": 0.009148858850326961
+      "cv_roc_auc_mean": 0.8613344213756117,
+      "cv_roc_auc_std": 0.009330987568514878,
+      "cv_pr_auc_mean": 0.6832237186317192,
+      "cv_f1_mean": 0.6430177201380298,
+      "cv_precision_mean": 0.5390451733929995,
+      "cv_recall_mean": 0.7973244147157191
+    },
+    "GradientBoosting": {
+      "cv_roc_auc_mean": 0.8605322510114239,
+      "cv_roc_auc_std": 0.008453484152412276,
+      "cv_pr_auc_mean": 0.6765678202022964,
+      "cv_f1_mean": 0.6028266300913587,
+      "cv_precision_mean": 0.6669200498844675,
+      "cv_recall_mean": 0.5511705685618729
     },
     "XGBoost": {
-      "cv_roc_auc_mean": 0.8623102185108594,
-      "cv_roc_auc_std": 0.008791375026643755
+      "cv_roc_auc_mean": 0.862159733054145,
+      "cv_roc_auc_std": 0.009719588968788518,
+      "cv_pr_auc_mean": 0.6829821930675621,
+      "cv_f1_mean": 0.64889398209978,
+      "cv_precision_mean": 0.543168044111666,
+      "cv_recall_mean": 0.8060200668896321
     }
   },
   "candidate_comparisons": {
     "LogisticRegression": {
       "threshold": 0.5,
-      "accuracy": 0.7444996451383961,
-      "precision": 0.5123239436619719,
-      "recall": 0.7780748663101604,
-      "f1": 0.6178343949044586,
-      "roc_auc": 0.8488981890516417,
-      "pr_auc": 0.6452616070240341,
-      "brier_score": 0.1644801810280966,
+      "accuracy": 0.7501774308019872,
+      "precision": 0.519298245614035,
+      "recall": 0.7914438502673797,
+      "f1": 0.6271186440677966,
+      "roc_auc": 0.8493321966467747,
+      "pr_auc": 0.6461060245160553,
+      "brier_score": 0.16290886947446612,
       "confusion_matrix": {
-        "tn": 758,
-        "fp": 277,
-        "fn": 83,
-        "tp": 291
+        "tn": 761,
+        "fp": 274,
+        "fn": 78,
+        "tp": 296
       }
     },
     "RandomForest": {
       "threshold": 0.5,
-      "accuracy": 0.7608232789212207,
-      "precision": 0.5335753176043557,
-      "recall": 0.786096256684492,
-      "f1": 0.6356756756756756,
-      "roc_auc": 0.8528778836962979,
-      "pr_auc": 0.6629532204437896,
-      "brier_score": 0.15729843996493217,
+      "accuracy": 0.758694109297374,
+      "precision": 0.5303571428571429,
+      "recall": 0.7941176470588235,
+      "f1": 0.6359743040685225,
+      "roc_auc": 0.8513614404918752,
+      "pr_auc": 0.6622329026283676,
+      "brier_score": 0.15792780894081804,
       "confusion_matrix": {
-        "tn": 778,
-        "fp": 257,
-        "fn": 80,
-        "tp": 294
+        "tn": 772,
+        "fp": 263,
+        "fn": 77,
+        "tp": 297
+      }
+    },
+    "GradientBoosting": {
+      "threshold": 0.5,
+      "accuracy": 0.8048261178140526,
+      "precision": 0.6644518272425249,
+      "recall": 0.5347593582887701,
+      "f1": 0.5925925925925926,
+      "roc_auc": 0.8522087886538015,
+      "pr_auc": 0.662992349268617,
+      "brier_score": 0.13454232321352905,
+      "confusion_matrix": {
+        "tn": 934,
+        "fp": 101,
+        "fn": 174,
+        "tp": 200
       }
     },
     "XGBoost": {
       "threshold": 0.5,
-      "accuracy": 0.7622427253371186,
-      "precision": 0.5340314136125655,
-      "recall": 0.8181818181818182,
-      "f1": 0.6462513199577613,
-      "roc_auc": 0.8544266191325015,
-      "pr_auc": 0.6718026936991698,
-      "brier_score": 0.1573011577129364,
+      "accuracy": 0.7551454932576295,
+      "precision": 0.5254833040421792,
+      "recall": 0.7994652406417112,
+      "f1": 0.6341463414634146,
+      "roc_auc": 0.8550776305252009,
+      "pr_auc": 0.6691429331037682,
+      "brier_score": 0.1568789929151535,
       "confusion_matrix": {
-        "tn": 768,
-        "fp": 267,
-        "fn": 68,
-        "tp": 306
+        "tn": 765,
+        "fp": 270,
+        "fn": 75,
+        "tp": 299
       }
     }
   },
-  "default_threshold": 0.5,
+  "default_threshold": 0.45,
   "test_metrics_default_05": {
     "threshold": 0.5,
-    "accuracy": 0.7622427253371186,
-    "precision": 0.5340314136125655,
-    "recall": 0.8181818181818182,
-    "f1": 0.6462513199577613,
-    "roc_auc": 0.8544266191325015,
-    "pr_auc": 0.6718026936991698,
-    "brier_score": 0.1573011577129364,
+    "accuracy": 0.7551454932576295,
+    "precision": 0.5254833040421792,
+    "recall": 0.7994652406417112,
+    "f1": 0.6341463414634146,
+    "roc_auc": 0.8550776305252009,
+    "pr_auc": 0.6691429331037682,
+    "brier_score": 0.1568789929151535,
     "confusion_matrix": {
-      "tn": 768,
-      "fp": 267,
-      "fn": 68,
-      "tp": 306
+      "tn": 765,
+      "fp": 270,
+      "fn": 75,
+      "tp": 299
     }
   },
   "test_metrics_tuned_threshold": {
-    "threshold": 0.5,
-    "accuracy": 0.7622427253371186,
-    "precision": 0.5340314136125655,
-    "recall": 0.8181818181818182,
-    "f1": 0.6462513199577613,
-    "roc_auc": 0.8544266191325015,
-    "pr_auc": 0.6718026936991698,
-    "brier_score": 0.1573011577129364,
+    "threshold": 0.45,
+    "accuracy": 0.7480482611781405,
+    "precision": 0.515650741350906,
+    "recall": 0.8368983957219251,
+    "f1": 0.6381243628950051,
+    "roc_auc": 0.8550776305252009,
+    "pr_auc": 0.6691429331037682,
+    "brier_score": 0.1568789929151535,
     "confusion_matrix": {
-      "tn": 768,
-      "fp": 267,
-      "fn": 68,
-      "tp": 306
+      "tn": 741,
+      "fp": 294,
+      "fn": 61,
+      "tp": 313
     }
   },
   "num_features_in": 19,
-  "num_features_transformed": 49,
+  "num_features_transformed": 54,
+  "feature_names": [
+    "Tenure Months",
+    "Monthly Charges",
+    "Total Charges",
+    "ServiceCount",
+    "AvgMonthlyCharges",
+    "ChargeDiffRatio",
+    "Gender_Female",
+    "Gender_Male",
+    "Senior Citizen_No",
+    "Senior Citizen_Yes",
+    "Partner_No",
+    "Partner_Yes",
+    "Dependents_No",
+    "Dependents_Yes",
+    "Phone Service_No",
+    "Phone Service_Yes",
+    "Multiple Lines_No",
+    "Multiple Lines_No phone service",
+    "Multiple Lines_Yes",
+    "Internet Service_DSL",
+    "Internet Service_Fiber optic",
+    "Internet Service_No",
+    "Online Security_No",
+    "Online Security_No internet service",
+    "Online Security_Yes",
+    "Online Backup_No",
+    "Online Backup_No internet service",
+    "Online Backup_Yes",
+    "Device Protection_No",
+    "Device Protection_No internet service",
+    "Device Protection_Yes",
+    "Tech Support_No",
+    "Tech Support_No internet service",
+    "Tech Support_Yes",
+    "Streaming TV_No",
+    "Streaming TV_No internet service",
+    "Streaming TV_Yes",
+    "Streaming Movies_No",
+    "Streaming Movies_No internet service",
+    "Streaming Movies_Yes",
+    "Contract_Month-to-month",
+    "Contract_One year",
+    "Contract_Two year",
+    "Paperless Billing_No",
+    "Paperless Billing_Yes",
+    "Payment Method_Bank transfer (automatic)",
+    "Payment Method_Credit card (automatic)",
+    "Payment Method_Electronic check",
+    "Payment Method_Mailed check",
+    "TenureGroup_0-12m",
+    "TenureGroup_13-24m",
+    "TenureGroup_25-48m",
+    "TenureGroup_49-60m",
+    "TenureGroup_61-72m+"
+  ],
   "top_features": [
     {
       "feature": "Contract_Month-to-month",
-      "importance": 0.29182
+      "importance": 0.27236
     },
     {
       "feature": "Online Security_No",
-      "importance": 0.08635
+      "importance": 0.09948
     },
     {
       "feature": "Internet Service_Fiber optic",
-      "importance": 0.08222
-    },
-    {
-      "feature": "Contract_Two year",
-      "importance": 0.05497
-    },
-    {
-      "feature": "Internet Service_DSL",
-      "importance": 0.05123
-    },
-    {
-      "feature": "Tech Support_No",
-      "importance": 0.03716
-    },
-    {
-      "feature": "Dependents_No",
-      "importance": 0.03658
-    },
-    {
-      "feature": "Phone Service_Yes",
-      "importance": 0.03255
-    },
-    {
-      "feature": "Contract_One year",
-      "importance": 0.02137
-    },
-    {
-      "feature": "Payment Method_Electronic check",
-      "importance": 0.0205
+      "importance": 0.07892
     },
     {
       "feature": "Dependents_Yes",
-      "importance": 0.02049
+      "importance": 0.03971
+    },
+    {
+      "feature": "Tech Support_No",
+      "importance": 0.03862
+    },
+    {
+      "feature": "Contract_Two year",
+      "importance": 0.03736
+    },
+    {
+      "feature": "Dependents_No",
+      "importance": 0.03484
+    },
+    {
+      "feature": "Internet Service_DSL",
+      "importance": 0.03386
+    },
+    {
+      "feature": "TenureGroup_0-12m",
+      "importance": 0.02704
+    },
+    {
+      "feature": "Contract_One year",
+      "importance": 0.02376
     },
     {
       "feature": "Streaming Movies_Yes",
-      "importance": 0.0199
+      "importance": 0.02364
+    },
+    {
+      "feature": "Payment Method_Electronic check",
+      "importance": 0.02234
     },
     {
       "feature": "Tenure Months",
-      "importance": 0.01884
+      "importance": 0.01643
     },
     {
-      "feature": "Phone Service_No",
-      "importance": 0.01193
+      "feature": "Internet Service_No",
+      "importance": 0.01386
     },
     {
-      "feature": "Streaming TV_Yes",
-      "importance": 0.01057
+      "feature": "Paperless Billing_No",
+      "importance": 0.01093
     }
   ]
 }
