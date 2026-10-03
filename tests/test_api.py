@@ -28,7 +28,7 @@ def test_api_predict(client):
     data = res.json()
     assert "churn_probability" in data
     assert "explanation" in data
-    assert data["risk_tier"] == "High"
+    assert data["risk_tier"] == "HIGH"
 
 def test_api_analytics_summary(client):
     res = client.get("/analytics/summary")

@@ -23,8 +23,8 @@ def test_risk_differentiation(predictor):
     high_res = predictor.predict_single(SAMPLE_HIGH_RISK_CUSTOMER)
     low_res = predictor.predict_single(SAMPLE_LOW_RISK_CUSTOMER)
     assert high_res["churn_probability"] > low_res["churn_probability"]
-    assert high_res["risk_tier"] == "High"
-    assert low_res["risk_tier"] == "Low"
+    assert high_res["risk_tier"] == "HIGH"
+    assert low_res["risk_tier"] == "LOW"
 
 def test_shap_explanation_structure(explainer):
     exp = explainer.explain_instance(SAMPLE_HIGH_RISK_CUSTOMER, top_n=5)
