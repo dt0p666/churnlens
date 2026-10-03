@@ -29,8 +29,9 @@ export default function App() {
                 <Route path="/predict" element={<Predict />} />
                 <Route path="/what-if" element={<WhatIf />} />
                 <Route path="/batch" element={<Batch />} />
-                <Route path="/analytics" element={<Analytics />} />
+                <Route path="/model-info" element={<ModelIntel />} />
                 <Route path="/model-intel" element={<ModelIntel />} />
+                <Route path="/analytics" element={<Analytics />} />
                 <Route path="/api-docs" element={<ApiDocs />} />
                 <Route path="/settings" element={<Settings />} />
               </Routes>

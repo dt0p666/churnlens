@@ -36,3 +36,21 @@ def test_api_analytics_summary(client):
     data = res.json()
     assert data["total_customers"] == 7043
     assert data["churn_rate"] > 0.20
+
+def test_api_whatif(client):
+    payload = {
+        "baseline": SAMPLE_HIGH_RISK_CUSTOMER,
+        "modifications": {
+            "Contract": "Two year",
+            "Online Security": "Yes",
+            "Tech Support": "Yes"
+        }
+    }
+    res = client.post("/whatif", json=payload)
+    assert res.status_code == 200
+    data = res.json()
+    assert "baseline_probability" in data
+    assert "simulated_probability" in data
+    assert data["risk_delta"] < 0  # 2-year contract + security reduces risk
+    assert "percentage_points_change" in data
+    assert "disclaimer" in data

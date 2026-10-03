@@ -35,8 +35,12 @@ async def predict_batch_csv(
             response.headers["Content-Disposition"] = f"attachment; filename=scored_{file.filename}"
             return response
 
-        # Return summary plus sample preview
-        preview_records = scored_df.head(50).to_dict(orient="records")
+        # Robust NaN-safe dictionary conversion for clean JSON output
+        raw_preview = scored_df.head(50).to_dict(orient="records")
+        preview_records = [
+            {k: (None if pd.isna(v) else v) for k, v in row.items()}
+            for row in raw_preview
+        ]
         return {
             "summary": summary,
             "preview": preview_records

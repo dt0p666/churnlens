@@ -16,10 +16,10 @@ import {
 const NAV_ITEMS = [
   { to: '/', label: 'Overview', icon: LayoutDashboard },
   { to: '/predict', label: 'Single Prediction', icon: UserCheck },
-  { to: '/what-if', label: 'What-If Simulator', icon: SlidersHorizontal, badge: 'Flagship' },
   { to: '/batch', label: 'Batch Scoring', icon: FileSpreadsheet },
+  { to: '/what-if', label: 'What-If Simulator', icon: SlidersHorizontal, badge: 'Flagship' },
+  { to: '/model-info', label: 'Model Info', icon: Cpu },
   { to: '/analytics', label: 'Analytics', icon: BarChart3 },
-  { to: '/model-intel', label: 'Model Intelligence', icon: Cpu },
   { to: '/api-docs', label: 'API Playground', icon: Terminal },
   { to: '/settings', label: 'Settings', icon: Settings },
 ];

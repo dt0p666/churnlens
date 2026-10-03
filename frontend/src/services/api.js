@@ -58,4 +58,9 @@ export const api = {
     const res = await client.get('/analytics/samples');
     return res.data;
   },
+
+  simulateWhatIf: async (payload) => {
+    const res = await client.post('/whatif', payload);
+    return res.data;
+  },
 };

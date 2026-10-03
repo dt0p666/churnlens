@@ -33,6 +33,22 @@ class PredictionResponseSchema(BaseModel):
     model_name: str
     explanation: Optional[Dict[str, Any]] = None
 
+class WhatIfRequestSchema(BaseModel):
+    model_config = ConfigDict(populate_by_name=True)
+    baseline: CustomerProfileSchema
+    simulated: Optional[CustomerProfileSchema] = None
+    modifications: Optional[Dict[str, Any]] = None
+
+class WhatIfResponseSchema(BaseModel):
+    baseline_probability: float
+    baseline_risk_tier: str
+    simulated_probability: float
+    simulated_risk_tier: str
+    risk_delta: float
+    percentage_points_change: float
+    model_version: str
+    disclaimer: str
+
 class BatchSummarySchema(BaseModel):
     total_rows: int
     valid_rows: int
@@ -43,6 +59,7 @@ class BatchSummarySchema(BaseModel):
     medium_risk: int
     low_risk: int
     mean_probability: float
+    invalid_reasons: Optional[List[Dict[str, Any]]] = None
 
 class ModelInfoSchema(BaseModel):
     model_name: str
