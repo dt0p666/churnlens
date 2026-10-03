@@ -3,33 +3,35 @@
 ## Model Details
 - **Model Name:** ChurnLens XGBoost Pipeline
 - **Version:** `v1.0.0`
-- **Model Type:** Extreme Gradient Boosting Classifier (`XGBClassifier`) wrapped in Scikit-Learn `Pipeline` with `ColumnTransformer`
-- **Artifacts:** `models/production/pipeline.joblib`, `models/production/metadata.json`
-- **Frameworks:** `scikit-learn 1.9.1`, `xgboost 3.4.1`, `shap 0.52.0`
-- **Class Balancing:** `scale_pos_weight = 2.77` (matching negative-to-positive ratio in training data)
+- **Model Architecture:** Extreme Gradient Boosting Classifier (`XGBClassifier`, `n_estimators=140`, `scale_pos_weight=2.77`) preceded by zero-leakage `TelcoFeatureEngineer` and `ColumnTransformer` (StandardScaler + OneHotEncoder).
+- **Artifacts:** `models/production/pipeline.joblib`, `models/production/metadata.json`, `models/production/calibration_curve.json`.
+- **Frameworks:** Python 3.14+, `scikit-learn 1.5+`, `xgboost 2.1+`, `shap 0.46+`.
 
-## Intended Use
-- **Primary Use Case:** Proactive identification of enterprise and consumer telecommunications customers with high attrition probability.
-- **Decision Support:** Outputs calibrated churn probabilities ($p \in [0, 1]$), risk tiers (High $\ge 0.60$, Medium $0.35 - 0.60$, Low $< 0.35$), and local TreeSHAP attribution factors to guide customer retention representatives.
-- **Out-of-Scope:** Automated customer termination, dynamic contract repricing without human review, credit scoring, or decisions requiring strict causal guarantees.
+## Intended Use & Purpose
+- **Primary Purpose:** Proactive identification of enterprise and consumer telecommunications customers with high attrition probability.
+- **Decision Support:** Provides calibrated churn probabilities ($p \in [0, 1]$), risk tiers (HIGH $\ge 0.60$, MEDIUM $0.35 - 0.5999$, LOW $< 0.35$), local TreeSHAP attribution factors, and cost-optimal threshold recommendations for customer success managers.
+- **What the Model Should NOT Be Used For:**
+  - Automated unilateral account termination or service throttling.
+  - Punitive or predatory dynamic contract repricing without customer consent.
+  - Credit scoring, lending underwriting, or regulatory financial decisions.
+  - Prescriptive causal policy decisions without A/B retention validation (the model estimates $P(Y \mid X)$, not $P(Y \mid do(X))$).
 
-## Training Data & Methodology
-- **Dataset:** IBM Telco Customer Churn (7,043 rows, 33 raw features).
-- **Leakage Isolation:** Strict exclusion of post-event and vendor diagnostic features (`Churn Reason`, `Churn Score`, `CLTV`), zero-variance geographical constants (`Count`, `Country`, `State`), and identifiers (`CustomerID`).
-- **Data Split:** 80% Stratified Training (5,634 rows), 20% Stratified Holdout Test (1,409 rows), random seed = `42`.
-- **Cross-Validation:** 5-Fold Stratified Cross-Validation on the training partition.
+## Training Data & Leakage Isolation
+- **Dataset:** IBM Telco Customer Churn benchmark (7,043 rows, 33 raw features).
+- **Leakage Quarantine:** Strictly dropped post-event and vendor diagnostic features: `Churn Reason` (100% target leakage), `Churn Score` ($r=0.665$ vendor score), and `CLTV`. Excluded zero-variance constants (`Count`, `Country`, `State`) and identifiers (`CustomerID`).
+- **Data Splits:** 80% Stratified Training (5,634 rows), 20% Stratified Holdout Test (1,409 rows), fixed seed `42`.
 
-## Performance Metrics (Real Evaluation)
-| Metric | Stratified 5-Fold CV | Holdout Test (Threshold = 0.50) | Holdout Test (Tuned Threshold = 0.35) |
+## Verified Evaluation Benchmarks (Real Runs)
+| Metric | Stratified 5-Fold CV | Holdout Test (Threshold = 0.50) | Holdout Test (Optimal F1 Threshold = 0.45) |
 | :--- | :--- | :--- | :--- |
-| **ROC-AUC** | **0.8623 ± 0.0088** | **0.8544** | **0.8544** |
-| **PR-AUC (Avg Precision)** | 0.7012 ± 0.0110 | 0.6970 | 0.6970 |
-| **Accuracy** | 80.4% | 83.2% | 79.8% |
-| **Recall (Sensitivity)** | 81.2% | 72.2% | **84.8%** |
-| **Precision** | 58.6% | 67.0% | 57.2% |
-| **F1 Score** | 0.680 | 0.695 | **0.683** |
-| **Brier Score** | - | 0.128 | 0.128 |
+| **ROC-AUC** | **0.8622 ± 0.0097** | **0.8551** | **0.8551** |
+| **PR-AUC** | 0.6830 ± 0.0120 | 0.6691 | 0.6691 |
+| **Recall** | 80.60% | 79.95% | **83.69%** (313/374 churners captured) |
+| **Precision** | 54.32% | 52.55% | 51.57% |
+| **F1 Score** | 0.6489 | 0.6341 | **0.6381** |
+| **Brier Score** | - | 0.1569 (Raw) | **0.1329** (Calibrated via Sigmoid Platt Scaling) |
 
-## Limitations & Non-Causal Boundary
-1. **Correlation vs. Causality:** SHAP values identify the statistical weight of features within the trained model. They **do not prove** that changing a customer's contract from Month-to-month to Two-year will cause them to stay.
-2. **Distribution Shift:** If telecommunications pricing or competitor offerings change significantly, Population Stability Index (PSI) drift monitoring must be checked, and the model retrained.
+## Limitations & Fairness Diagnostics
+1. **Public Benchmark Bias:** Trained on static IBM Telco data without real-time clickstream or cellular network QoS logs.
+2. **Subgroup Vulnerability:** 2-year contract customers exhibit low base churn prevalence (2.8%), making false positives proportionally more expensive; newly acquired customers (<6 months tenure) show higher prediction variance due to limited historical tenure telemetry.
+3. **Distribution Drift:** In production, input features must be continuously monitored using Population Stability Index (PSI) to detect pricing or demographic shifts.

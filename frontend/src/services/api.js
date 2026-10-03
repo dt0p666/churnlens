@@ -68,4 +68,21 @@ export const api = {
     const res = await client.post('/whatif', payload);
     return res.data;
   },
+
+  getCostOptimization: async (params = {}) => {
+    const res = await client.get('/business/cost-optimization', { params });
+    return res.data;
+  },
+
+  getRetentionPlanner: async (params = {}) => {
+    const res = await client.get('/business/retention-planner', { params });
+    return res.data;
+  },
+
+  getDriftStatus: async (useSimulatedShift = false) => {
+    const res = await client.get('/monitoring/drift-status', {
+      params: { use_simulated_shift: useSimulatedShift },
+    });
+    return res.data;
+  },
 };

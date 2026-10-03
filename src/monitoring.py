@@ -230,3 +230,47 @@ def check_feature_drift(
         "high_drift_features": res["high_drift_features"],
         "features": res["features"],
     }
+
+def generate_simulated_drift_dataset(n_samples: int = 500, random_state: int = 42) -> pd.DataFrame:
+    """
+    Generates a deliberately shifted cohort (clearly labeled SIMULATED)
+    to demonstrate live covariate drift detection.
+    Simulated distribution shifts:
+      - Tenure Months: shifted sharply downward (mean ~ 6.5 months vs baseline 32.4 months)
+      - Monthly Charges: inflated by 35% (mean ~ $92 vs baseline $64.8)
+      - Contract: 85% Month-to-month (vs baseline 55%)
+      - Payment Method: 75% Electronic check (vs baseline 33%)
+    """
+    np.random.seed(random_state)
+    df = pd.DataFrame({
+        "Gender": np.random.choice(["Male", "Female"], size=n_samples),
+        "Senior Citizen": np.random.choice(["No", "Yes"], size=n_samples, p=[0.7, 0.3]),
+        "Partner": np.random.choice(["No", "Yes"], size=n_samples, p=[0.65, 0.35]),
+        "Dependents": np.random.choice(["No", "Yes"], size=n_samples, p=[0.8, 0.2]),
+        # Severe tenure shift towards newly acquired fragile cohorts
+        "Tenure Months": np.clip(np.random.exponential(scale=6.0, size=n_samples).astype(int) + 1, 1, 72),
+        "Phone Service": np.random.choice(["Yes", "No"], size=n_samples, p=[0.9, 0.1]),
+        "Multiple Lines": np.random.choice(["No", "Yes"], size=n_samples, p=[0.6, 0.4]),
+        "Internet Service": np.random.choice(["Fiber optic", "DSL", "No"], size=n_samples, p=[0.70, 0.20, 0.10]),
+        "Online Security": np.random.choice(["No", "Yes"], size=n_samples, p=[0.85, 0.15]),
+        "Online Backup": np.random.choice(["No", "Yes"], size=n_samples, p=[0.75, 0.25]),
+        "Device Protection": np.random.choice(["No", "Yes"], size=n_samples, p=[0.75, 0.25]),
+        "Tech Support": np.random.choice(["No", "Yes"], size=n_samples, p=[0.85, 0.15]),
+        "Streaming TV": np.random.choice(["Yes", "No"], size=n_samples, p=[0.6, 0.4]),
+        "Streaming Movies": np.random.choice(["Yes", "No"], size=n_samples, p=[0.6, 0.4]),
+        # Contract shifted to high-volatility month-to-month
+        "Contract": np.random.choice(["Month-to-month", "One year", "Two year"], size=n_samples, p=[0.85, 0.10, 0.05]),
+        "Paperless Billing": np.random.choice(["Yes", "No"], size=n_samples, p=[0.90, 0.10]),
+        # Payment shifted to high-friction electronic check
+        "Payment Method": np.random.choice(
+            ["Electronic check", "Mailed check", "Bank transfer (automatic)", "Credit card (automatic)"],
+            size=n_samples,
+            p=[0.75, 0.10, 0.08, 0.07]
+        ),
+        # Monthly charges inflated
+        "Monthly Charges": np.round(np.random.normal(loc=92.5, scale=14.0, size=n_samples), 2),
+    })
+
+    df["Total Charges"] = np.round(df["Tenure Months"] * df["Monthly Charges"], 2)
+    return df
+

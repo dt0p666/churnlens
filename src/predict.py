@@ -118,6 +118,10 @@ class ChurnPredictor:
 
         summary = {
             **val_summary,
+            "total_records": len(df),
+            "scored_records": len(valid_df),
+            "skipped_records": len(invalid_df),
+            "high_risk_count": high_risk,
             "scored_count": len(valid_df),
             "high_risk": high_risk,
             "medium_risk": med_risk,
