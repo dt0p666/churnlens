@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  api:
+    build: .
+    container_name: churnlens-api
+    ports:
+      - "8000:8000"
+    environment:
+      - ENVIRONMENT=production
+      - DATABASE_URL=sqlite:///./churnlens.db
+      - API_PORT=8000
+    volumes:
+      - ./models:/app/models
+      - ./data:/app/data
+    restart: unless-stopped

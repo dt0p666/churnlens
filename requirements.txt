@@ -1,0 +1,35 @@
+# ==============================================================================
+# ChurnLens - Production Machine Learning Platform Dependencies
+# Target Python Version: 3.14+ (Compatible with Python 3.11 - 3.14)
+# ==============================================================================
+
+# Core Machine Learning & Scientific Stack
+numpy>=2.0.0
+pandas>=2.2.0
+scipy>=1.14.0
+scikit-learn>=1.5.0
+xgboost>=2.1.0
+shap>=0.46.0
+joblib>=1.4.0
+
+# Visualization & Reporting
+matplotlib>=3.9.0
+seaborn>=0.13.0
+
+# Backend & REST API
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+pydantic>=2.8.0
+python-multipart>=0.0.9
+httpx>=0.27.0
+python-dotenv>=1.0.0
+
+# Database & Persistence (SQLAlchemy 2.0 with SQLite / PostgreSQL support)
+SQLAlchemy>=2.0.30
+psycopg2-binary>=2.9.9
+
+# Quality Assurance & Testing
+pytest>=8.3.0
+
+# Interactive Notebook Development & Kernels
+ipykernel>=6.29.0
