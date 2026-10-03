@@ -1,16 +1,18 @@
 # ChurnLens 🔍
 > **"See churn before it becomes a problem."**  
-> End-to-end customer churn intelligence platform with calibrated gradient boosting, TreeSHAP interpretability, counterfactual what-if simulation, and batch scoring.
+> End-to-end customer churn intelligence platform with calibrated gradient boosting, TreeSHAP interpretability, counterfactual what-if simulation, batch scoring, and PSI drift monitoring.
 
 ---
 
 ## ⚡ Key Highlights & Benchmark Results
 - **Winning Estimator:** XGBoost Classifier (`scale_pos_weight=2.77`, `n_estimators=140`)
-- **Stratified 5-Fold CV ROC-AUC:** `0.8623 ± 0.0088`
-- **Holdout Test ROC-AUC:** `0.8544`
-- **Holdout PR-AUC:** `0.6970` (Baseline prevalence = 26.5%)
-- **Zero-Leakage Architecture:** Scikit-Learn `ColumnTransformer` embedded in `Pipeline`
+- **Stratified 5-Fold CV ROC-AUC:** `0.8622 ± 0.0097` (Leader across Logistic Regression, Random Forest, Gradient Boosting)
+- **Holdout Test ROC-AUC:** `0.8551`
+- **Holdout PR-AUC:** `0.6691` (Baseline positive prevalence = 26.5%)
+- **Optimal Decision Threshold:** `0.45` (F1-score = `0.6381`, Recall = `80.60%` on holdout test set)
+- **Zero-Leakage Architecture:** Custom `TelcoFeatureEngineer` and `ColumnTransformer` embedded in scikit-learn `Pipeline`
 - **Explainability:** Local TreeSHAP attribution with explicit non-causal disclosures
+- **Data & Concept Drift:** Automated Population Stability Index (PSI) monitoring across numerical and categorical features
 
 ---
 
@@ -26,7 +28,8 @@ React 18 + Vite (Tailwind CSS, Lucide, Recharts)
 FastAPI Backend (Pydantic v2 validation)
    ├── SQLite / PostgreSQL (Audit Logging via SQLAlchemy 2.0)
    ├── Vectorized Batch CSV Engine
-   └── Scikit-Learn Pipeline (`pipeline.joblib`)
+   ├── PSI Drift Monitoring Engine (`src/monitoring.py`)
+   └── Scikit-Learn Pipeline (`models/production/pipeline.joblib`)
          ├── Custom Feature Engineering (`TelcoFeatureEngineer`)
          ├── ColumnTransformer (StandardScaler + OneHotEncoder)
          ├── Calibrated XGBoost Estimator
@@ -52,7 +55,7 @@ python -m src.train
 # Start FastAPI server
 uvicorn api.main:app --reload --port 8000
 ```
-API Documentation will be available at: `http://localhost:8000/docs`
+Interactive Swagger API Documentation: `http://localhost:8000/docs`
 
 ### 2. Frontend Setup
 ```bash
@@ -60,12 +63,21 @@ cd frontend
 npm install
 npm run dev
 ```
-Dashboard will open at: `http://localhost:5173`
+Dashboard available at: `http://localhost:5173`
 
-### 3. Run Test Suite
+### 3. Docker Deployment
+```bash
+# Build and run both backend and frontend
+docker compose up --build
+```
+- Frontend UI: `http://localhost:3000`
+- FastAPI API: `http://localhost:8000`
+
+### 4. Run Test Suite
 ```bash
 pytest -v tests/
 ```
+All 21 unit and integration tests validate schema verification, feature engineering, pipeline inference, TreeSHAP attributions, REST API endpoints, and Population Stability Index (PSI) drift detection.
 
 ---
 
@@ -87,8 +99,8 @@ churnproject/
 ├── notebooks/01_eda.ipynb              # Exploratory Data Analysis notebook
 ├── api/                                # FastAPI application, database & routes
 ├── frontend/                           # React + Vite + Tailwind CSS dashboard
-├── tests/                              # Pytest test suite (13 passing tests)
-├── docs/                               # Model card & interview Q&As
+├── tests/                              # Pytest test suite (21 passing tests)
+├── .github/workflows/ci.yml            # Automated CI pipeline (Pytest + Vite build)
 ├── Dockerfile & docker-compose.yml     # Production container orchestration
 └── requirements.txt                    # Pinned dependencies
 ```

@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   api:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: churnlens-api
     ports:
       - "8000:8000"
@@ -10,7 +12,24 @@ services:
       - ENVIRONMENT=production
       - DATABASE_URL=sqlite:///./churnlens.db
       - API_PORT=8000
+      - CORS_ORIGINS=http://localhost:3000,http://localhost:5173,http://127.0.0.1:3000,http://127.0.0.1:5173
     volumes:
       - ./models:/app/models
       - ./data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: churnlens-frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
     restart: unless-stopped
