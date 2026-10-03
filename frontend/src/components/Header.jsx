@@ -1,53 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Activity, Database, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Menu, Database, ShieldCheck, Activity } from 'lucide-react';
 
-export default function Header({ title, subtitle }) {
-  const [health, setHealth] = useState(null);
+export default function Header({ onMenuClick = () => {} }) {
   const [online, setOnline] = useState(false);
+  const [modelVersion, setModelVersion] = useState('v1.0.0');
 
   useEffect(() => {
-    let isMounted = true;
     api.getHealth()
       .then((data) => {
-        if (isMounted) {
-          setHealth(data);
-          setOnline(data.status === 'healthy');
-        }
+        setOnline(data.status === 'healthy');
+        if (data.version) setModelVersion(data.version);
       })
-      .catch(() => {
-        if (isMounted) setOnline(false);
-      });
-    return () => { isMounted = false; };
+      .catch(() => setOnline(false));
   }, []);
 
   return (
-    <header className="h-16 px-8 border-b border-slate-800 bg-slate-900/60 backdrop-blur-sm flex items-center justify-between flex-shrink-0">
-      <div>
-        <h2 className="text-lg font-semibold text-white tracking-tight">{title}</h2>
-        {subtitle && <p className="text-xs text-slate-400">{subtitle}</p>}
+    <header className="h-16 px-6 border-b border-navy-800 bg-navy-950/70 backdrop-blur-md flex items-center justify-between flex-shrink-0 z-20">
+      <div className="flex items-center gap-3">
+        <button
+          onClick={onMenuClick}
+          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-navy-850 md:hidden transition-colors"
+          aria-label="Open Navigation Menu"
+        >
+          <Menu className="h-5 w-5" />
+        </button>
+        <span className="text-xs font-mono font-medium text-slate-400 hidden sm:inline-block">
+          CHURNLENS <span className="text-slate-600">/</span> ENTERPRISE RADAR
+        </span>
       </div>
 
-      <div className="flex items-center gap-4">
-        {/* Backend Status Indicator */}
-        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs">
-          {online ? (
-            <>
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-slate-300 font-medium">API Connected</span>
-            </>
-          ) : (
-            <>
-              <span className="h-2 w-2 rounded-full bg-amber-400"></span>
-              <span className="text-slate-400 font-medium">Local Mock / Standby</span>
-            </>
-          )}
+      <div className="flex items-center gap-3">
+        {/* Model Version Pill */}
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-900 border border-navy-750 text-xs font-mono text-slate-300">
+          <Activity className="h-3.5 w-3.5 text-cyanAccent" />
+          <span>{modelVersion}</span>
         </div>
 
-        {/* Database indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-slate-800/80 border border-slate-700/60 text-xs text-slate-400">
-          <Database className="h-3.5 w-3.5 text-slate-400" />
-          <span>SQLite / PG Audit</span>
+        {/* API Health Pill */}
+        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-navy-900 border border-navy-750 text-xs font-mono">
+          <span className={`h-2 w-2 rounded-full ${online ? 'bg-cyanAccent animate-pulse shadow-[0_0_8px_#22D3EE]' : 'bg-amber-400'}`} />
+          <span className="text-slate-300">{online ? 'API ONLINE' : 'STANDBY'}</span>
         </div>
       </div>
     </header>

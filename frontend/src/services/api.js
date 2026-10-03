@@ -59,6 +59,11 @@ export const api = {
     return res.data;
   },
 
+  getCustomers: async (params = {}) => {
+    const res = await client.get('/analytics/customers', { params });
+    return res.data;
+  },
+
   simulateWhatIf: async (payload) => {
     const res = await client.post('/whatif', payload);
     return res.data;

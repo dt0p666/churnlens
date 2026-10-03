@@ -105,17 +105,60 @@ def get_sample_customers() -> List[Dict[str, Any]]:
     Returns actual customer profiles from the dataset for fast loading and experimentation in UI.
     """
     df = load_raw_dataset()
-    # Pick 5 diverse customers: high risk, medium risk, low risk
-    sample_indices = [0, 2, 10, 25, 40]
+    # Pick diverse customers across cohorts
+    sample_indices = [0, 2, 5, 8, 10, 15, 20, 25, 30, 40]
     sub_df = df.iloc[sample_indices]
 
     cols_needed = config.CATEGORICAL_COLS + config.NUMERICAL_COLS
     samples = []
     for idx, row in sub_df.iterrows():
         sample = {c: row[c] for c in cols_needed}
-        # ensure Total Charges is float
         sample["Total Charges"] = float(row["Total Charges Clean"])
         sample["CustomerID"] = str(row["CustomerID"])
         sample["ActualChurn"] = int(row[config.TARGET_COL])
         samples.append(sample)
     return samples
+
+@router.get("/customers")
+def get_customers(
+    limit: int = 50,
+    offset: int = 0,
+    search: str = "",
+    contract: str = ""
+) -> Dict[str, Any]:
+    """
+    Paginated, searchable directory of actual Telco customers for the Customers view.
+    """
+    df = load_raw_dataset()
+    filtered = df
+
+    if search:
+        s = search.strip().lower()
+        filtered = filtered[
+            filtered["CustomerID"].astype(str).str.lower().str.contains(s) |
+            filtered["Payment Method"].astype(str).str.lower().str.contains(s) |
+            filtered["Internet Service"].astype(str).lower().str.contains(s)
+        ]
+
+    if contract and contract != "ALL":
+        filtered = filtered[filtered["Contract"] == contract]
+
+    total_count = len(filtered)
+    paged = filtered.iloc[offset : offset + limit]
+
+    cols_needed = config.CATEGORICAL_COLS + config.NUMERICAL_COLS
+    customers = []
+    for _, row in paged.iterrows():
+        cust = {c: row[c] for c in cols_needed}
+        cust["Total Charges"] = float(row["Total Charges Clean"])
+        cust["CustomerID"] = str(row["CustomerID"])
+        cust["ActualChurn"] = int(row[config.TARGET_COL])
+        customers.append(cust)
+
+    return {
+        "total": total_count,
+        "limit": limit,
+        "offset": offset,
+        "customers": customers
+    }
+

@@ -1,20 +1,28 @@
-import React, { useState, useEffect } from 'react';
-import { api } from '../services/api';
-import RiskBadge from '../components/RiskBadge';
+import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   SlidersHorizontal, 
-  Sparkles, 
   ArrowRight, 
-  RefreshCw, 
+  RotateCcw, 
   TrendingDown, 
   TrendingUp, 
+  ShieldCheck, 
+  AlertTriangle, 
   Info, 
-  RotateCcw,
-  ShieldCheck,
-  Zap
+  Sparkles,
+  Zap,
+  CheckCircle2
 } from 'lucide-react';
+import { api } from '../services/api';
+import PageHeader from '../components/common/PageHeader';
+import Card from '../components/common/Card';
+import Badge from '../components/common/Badge';
+import Button from '../components/common/Button';
+import RadialGauge from '../components/common/RadialGauge';
+import Skeleton from '../components/common/Skeleton';
 
-const DEFAULT_BASELINE = {
+const DEFAULT_PROFILE = {
   Gender: 'Female',
   'Senior Citizen': 'No',
   Partner: 'No',
@@ -37,328 +45,383 @@ const DEFAULT_BASELINE = {
 };
 
 export default function WhatIf() {
-  const [baseline, setBaseline] = useState(DEFAULT_BASELINE);
-  const [simulated, setSimulated] = useState(DEFAULT_BASELINE);
+  const location = useLocation();
+  const initialData = location.state?.initialCustomer || DEFAULT_PROFILE;
 
-  const [baselineResult, setBaselineResult] = useState(null);
-  const [simulatedResult, setSimulatedResult] = useState(null);
-  const [loading, setLoading] = useState(false);
-  const [autoSimulate, setAutoSimulate] = useState(true);
+  // Baseline is fixed to the starting customer profile
+  const [baseline, setBaseline] = useState(() => ({ ...initialData }));
+  // Simulated is mutable via sliders and switches
+  const [simulated, setSimulated] = useState(() => ({ ...initialData }));
 
-  // Compute baseline and initial simulated score
-  useEffect(() => {
-    let isMounted = true;
-    setLoading(true);
-    Promise.all([
-      api.predictChurn(baseline),
-      api.predictChurn(simulated)
-    ]).then(([baseRes, simRes]) => {
-      if (isMounted) {
-        setBaselineResult(baseRes);
-        setSimulatedResult(simRes);
-        setLoading(false);
-      }
-    }).catch((err) => {
-      console.error(err);
-      if (isMounted) setLoading(false);
-    });
-    return () => { isMounted = false; };
-  }, []);
+  const [simResult, setSimResult] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  const runSimulation = async (simProfile) => {
-    setLoading(true);
+  // Debounce ref
+  const debounceTimer = useRef(null);
+
+  const fetchSimulation = async (baseProfile, simProfile) => {
     try {
-      const res = await api.predictChurn(simProfile);
-      setSimulatedResult(res);
+      setLoading(true);
+      setError(null);
+      const res = await api.simulateWhatIf({
+        baseline: baseProfile,
+        simulated: simProfile,
+      });
+      setSimResult(res);
     } catch (err) {
-      console.error(err);
+      console.error('What-If simulation error:', err);
+      setError('Simulation failed. Please verify API server connectivity.');
     } finally {
       setLoading(false);
     }
   };
 
-  const handleSimChange = (field, value) => {
+  useEffect(() => {
+    fetchSimulation(baseline, simulated);
+  }, []);
+
+  // Debounced update when simulated changes
+  const triggerDebouncedSim = (newSim) => {
+    if (debounceTimer.current) {
+      clearTimeout(debounceTimer.current);
+    }
+    debounceTimer.current = setTimeout(() => {
+      fetchSimulation(baseline, newSim);
+    }, 180);
+  };
+
+  const handleSliderChange = (field, value) => {
     const updated = { ...simulated, [field]: value };
-    // Adjust total charges automatically if tenure or monthly charges change
-    if (field === 'Tenure Months' || field === 'Monthly Charges') {
-      const tenure = field === 'Tenure Months' ? parseFloat(value) : simulated['Tenure Months'];
-      const monthly = field === 'Monthly Charges' ? parseFloat(value) : simulated['Monthly Charges'];
-      updated['Total Charges'] = Math.round(tenure * monthly * 100) / 100;
+    // recalculate Total Charges roughly if tenure changes
+    if (field === 'Tenure Months') {
+      updated['Total Charges'] = Math.round(value * updated['Monthly Charges'] * 10) / 10;
+    } else if (field === 'Monthly Charges') {
+      updated['Total Charges'] = Math.round(updated['Tenure Months'] * value * 10) / 10;
     }
     setSimulated(updated);
+    triggerDebouncedSim(updated);
+  };
 
-    if (autoSimulate) {
-      runSimulation(updated);
-    }
+  const handleToggle = (field) => {
+    const nextVal = simulated[field] === 'Yes' ? 'No' : 'Yes';
+    const updated = { ...simulated, [field]: nextVal };
+    setSimulated(updated);
+    triggerDebouncedSim(updated);
   };
 
   const handleReset = () => {
-    setSimulated(baseline);
-    runSimulation(baseline);
+    setSimulated({ ...baseline });
+    fetchSimulation(baseline, baseline);
   };
 
-  const baseProb = baselineResult ? baselineResult.churn_probability : 0.85;
-  const simProb = simulatedResult ? simulatedResult.churn_probability : 0.85;
-  const delta = Math.round((simProb - baseProb) * 1000) / 10; // percentage point difference
+  const applyPreset = (presetName) => {
+    let modified = { ...simulated };
+    if (presetName === 'retention-bundle') {
+      modified.Contract = 'Two year';
+      modified['Online Security'] = 'Yes';
+      modified['Tech Support'] = 'Yes';
+      modified['Payment Method'] = 'Credit card (automatic)';
+    } else if (presetName === 'annual-discount') {
+      modified.Contract = 'One year';
+      modified['Monthly Charges'] = Math.max(20, Math.round((simulated['Monthly Charges'] * 0.85) * 10) / 10);
+      modified['Total Charges'] = Math.round(modified['Tenure Months'] * modified['Monthly Charges'] * 10) / 10;
+    } else if (presetName === 'high-risk-shift') {
+      modified.Contract = 'Month-to-month';
+      modified['Payment Method'] = 'Electronic check';
+      modified['Tech Support'] = 'No';
+      modified['Online Security'] = 'No';
+    }
+    setSimulated(modified);
+    fetchSimulation(baseline, modified);
+  };
+
+  const delta = simResult?.percentage_points_change ?? 0;
+  const isReduced = delta < 0;
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
+      <PageHeader
+        title="What-If Counterfactual Simulator"
+        subtitle="Simulate policy and contractual interventions on the XGBoost decision surface to observe projected churn probability shifts."
+        action={
           <div className="flex items-center gap-2">
-            <h2 className="text-xl font-bold text-white tracking-tight">Counterfactual What-If Simulator</h2>
-            <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
-              Flagship Capability
-            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleReset}
+              className="flex items-center gap-1.5"
+            >
+              <RotateCcw className="h-3.5 w-3.5" />
+              Revert to Baseline
+            </Button>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Simulate retention interventions and observe real-time model output shifts under alternative contract and service configurations.
-          </p>
+        }
+      />
+
+      {/* Flagship Side-by-Side Dual Gauges */}
+      <Card className="p-6 relative overflow-hidden bg-navy-900/80 backdrop-blur-md border border-navy-750">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
+          
+          {/* Baseline Gauge */}
+          <div className="flex-1 flex flex-col items-center text-center w-full">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-slate-400 font-semibold mb-1">
+              Current Baseline
+            </span>
+            <div className="my-2">
+              <RadialGauge
+                value={simResult ? simResult.baseline_probability : 0.5}
+                riskTier={simResult ? simResult.baseline_risk_tier : 'MEDIUM'}
+                size={190}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant={simResult?.baseline_risk_tier?.toLowerCase() || 'medium'}>
+                {simResult?.baseline_risk_tier || 'COMPUTING'}
+              </Badge>
+              <span className="text-xs font-mono text-slate-400">
+                Baseline Risk
+              </span>
+            </div>
+            <p className="text-[11px] font-mono text-slate-400 mt-2">
+              {baseline.Contract} &bull; {baseline['Tenure Months']}m tenure &bull; ${baseline['Monthly Charges']}/mo
+            </p>
+          </div>
+
+          {/* Animated Transition Pill & Delta */}
+          <div className="flex flex-col items-center justify-center px-4 py-3 rounded-2xl bg-navy-950/80 border border-navy-800 shadow-xl my-2 lg:my-0">
+            <span className="text-[10px] font-mono text-slate-400 uppercase tracking-wider mb-1">
+              Risk Delta
+            </span>
+            <motion.div
+              key={delta}
+              initial={{ scale: 0.85, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-base font-bold ${
+                isReduced
+                  ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
+                  : delta > 0
+                  ? 'bg-rose-500/15 text-rose-400 border border-rose-500/30'
+                  : 'bg-slate-800 text-slate-300 border border-slate-700'
+              }`}
+            >
+              {isReduced ? (
+                <TrendingDown className="h-5 w-5 text-emerald-400" />
+              ) : delta > 0 ? (
+                <TrendingUp className="h-5 w-5 text-rose-400" />
+              ) : null}
+              <span>{delta > 0 ? `+${delta.toFixed(1)}` : delta.toFixed(1)} pts</span>
+            </motion.div>
+
+            <div className="flex items-center gap-2 mt-2 text-slate-500">
+              <span className="text-[10px] font-mono">Current</span>
+              <ArrowRight className="h-3 w-3 text-cyanAccent animate-pulse" />
+              <span className="text-[10px] font-mono">Simulated</span>
+            </div>
+          </div>
+
+          {/* Simulated Scenario Gauge */}
+          <div className="flex-1 flex flex-col items-center text-center w-full">
+            <span className="text-[11px] font-mono uppercase tracking-widest text-cyanAccent font-semibold mb-1 flex items-center gap-1.5">
+              <Sparkles className="h-3.5 w-3.5 text-cyanAccent" />
+              Simulated Scenario
+            </span>
+            <div className="my-2">
+              <RadialGauge
+                value={simResult ? simResult.simulated_probability : 0.5}
+                riskTier={simResult ? simResult.simulated_risk_tier : 'MEDIUM'}
+                size={190}
+              />
+            </div>
+            <div className="flex items-center gap-2 mt-2">
+              <Badge variant={simResult?.simulated_risk_tier?.toLowerCase() || 'medium'}>
+                {simResult?.simulated_risk_tier || 'COMPUTING'}
+              </Badge>
+              <span className="text-xs font-mono text-slate-400">
+                Projected Risk
+              </span>
+            </div>
+            <p className="text-[11px] font-mono text-slate-400 mt-2">
+              {simulated.Contract} &bull; {simulated['Tenure Months']}m tenure &bull; ${simulated['Monthly Charges']}/mo
+            </p>
+          </div>
         </div>
 
+        {/* Mandatory Non-causal Methodology Disclaimer */}
+        <div className="mt-6 pt-4 border-t border-navy-800/80 flex items-start gap-3 bg-navy-950/40 p-3 rounded-lg border border-navy-800">
+          <Info className="h-4 w-4 text-cyanAccent flex-shrink-0 mt-0.5" />
+          <p className="text-xs text-slate-400 leading-relaxed font-sans">
+            <strong className="text-slate-200">Model simulation, not a causal prediction.</strong>{' '}
+            Counterfactual calculations evaluate the XGBoost decision surface under modified covariate values. They illustrate how the statistical model estimates risk for these attributes, but do not guarantee physical retention causation in the absence of randomized control trials.
+          </p>
+        </div>
+      </Card>
+
+      {/* Preset Interventions */}
+      <div className="flex flex-wrap items-center gap-3">
+        <span className="text-xs font-mono text-slate-400 uppercase tracking-wider">
+          Retention Recipes:
+        </span>
         <button
-          type="button"
-          onClick={handleReset}
-          className="flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700 transition-colors"
+          onClick={() => applyPreset('retention-bundle')}
+          className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors flex items-center gap-1.5"
         >
-          <RotateCcw className="h-3.5 w-3.5" />
-          Reset Simulation
+          <ShieldCheck className="h-3.5 w-3.5" />
+          2-Yr Contract + Security Bundle
+        </button>
+        <button
+          onClick={() => applyPreset('annual-discount')}
+          className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/30 hover:bg-cyanAccent/20 transition-colors flex items-center gap-1.5"
+        >
+          <Zap className="h-3.5 w-3.5" />
+          1-Year Plan (-15% Monthly Charge)
+        </button>
+        <button
+          onClick={() => applyPreset('high-risk-shift')}
+          className="px-3 py-1.5 rounded-lg text-xs font-mono font-medium bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 transition-colors flex items-center gap-1.5"
+        >
+          <AlertTriangle className="h-3.5 w-3.5" />
+          Simulate Unbundling Risk
         </button>
       </div>
 
-      {/* Main Side-by-Side Comparison Display */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
-          {/* Baseline State */}
-          <div className="p-5 rounded-xl bg-slate-950/80 border border-slate-800 flex flex-col items-center text-center">
-            <span className="text-xs uppercase tracking-wider font-semibold text-slate-400 mb-2">
-              Current Baseline Profile
-            </span>
-            <div className="text-4xl font-extrabold text-white tracking-tight my-2">
-              {(baseProb * 100).toFixed(1)}%
-            </div>
-            <RiskBadge tier={baselineResult?.risk_tier || 'High'} />
-            <p className="text-[11px] text-slate-500 mt-3">
-              {baseline.Contract} &bull; {baseline['Tenure Months']} mos &bull; ${baseline['Monthly Charges']}/mo
-            </p>
-          </div>
+      {/* Interactive Parameter Controls */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Sliders Card */}
+        <Card className="p-6 space-y-6">
+          <h3 className="font-heading font-semibold text-sm text-slate-200 flex items-center gap-2">
+            <SlidersHorizontal className="h-4 w-4 text-cyanAccent" />
+            Continuous Covariates (Sliders)
+          </h3>
 
-          {/* Delta Indicator */}
-          <div className="flex flex-col items-center justify-center text-center px-4">
-            <span className="text-xs font-semibold text-slate-400 mb-2">Simulated Shift</span>
-            <div className="flex items-center gap-2">
-              {delta < 0 ? (
-                <div className="flex items-center gap-1.5 text-emerald-400 text-2xl font-bold">
-                  <TrendingDown className="h-6 w-6" />
-                  <span>{Math.abs(delta)}%</span>
-                </div>
-              ) : delta > 0 ? (
-                <div className="flex items-center gap-1.5 text-rose-400 text-2xl font-bold">
-                  <TrendingUp className="h-6 w-6" />
-                  <span>+{delta}%</span>
-                </div>
-              ) : (
-                <div className="text-slate-400 text-2xl font-bold">0.0%</div>
-              )}
+          {/* Tenure Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <label className="text-slate-300 font-medium">Tenure Horizon</label>
+              <span className="font-mono text-cyanAccent font-bold text-sm">
+                {simulated['Tenure Months']} Months
+              </span>
             </div>
-            <span className="text-[11px] text-slate-400 mt-1">
-              {delta < 0 ? 'Model predicted risk reduction' : delta > 0 ? 'Model predicted risk increase' : 'No net change'}
-            </span>
-            <ArrowRight className="h-5 w-5 text-slate-600 mt-3 hidden md:block" />
-          </div>
-
-          {/* Simulated State */}
-          <div className="p-5 rounded-xl bg-slate-950/80 border border-emerald-500/30 flex flex-col items-center text-center relative overflow-hidden">
-            <div className="absolute top-2 right-2 flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
-              <Zap className="h-3 w-3" /> Live
-            </div>
-            <span className="text-xs uppercase tracking-wider font-semibold text-emerald-400 mb-2">
-              Simulated Outcome
-            </span>
-            <div className="text-4xl font-extrabold text-white tracking-tight my-2">
-              {(simProb * 100).toFixed(1)}%
-            </div>
-            <RiskBadge tier={simulatedResult?.risk_tier || 'Low'} />
-            <p className="text-[11px] text-slate-400 mt-3">
-              {simulated.Contract} &bull; {simulated['Tenure Months']} mos &bull; ${simulated['Monthly Charges']}/mo
-            </p>
-          </div>
-        </div>
-
-        {/* Progress Comparison Bar */}
-        <div className="mt-6 pt-5 border-t border-slate-800">
-          <div className="flex justify-between text-xs text-slate-400 mb-1.5">
-            <span>Risk Comparison Spectrum</span>
-            <span>Baseline: {(baseProb * 100).toFixed(1)}% &rarr; Simulated: {(simProb * 100).toFixed(1)}%</span>
-          </div>
-          <div className="h-3 bg-slate-800 rounded-full relative overflow-hidden flex">
-            <div
-              className="h-full bg-rose-500/40 transition-all duration-300"
-              style={{ width: `${baseProb * 100}%` }}
+            <input
+              type="range"
+              min="1"
+              max="72"
+              value={simulated['Tenure Months']}
+              onChange={(e) => handleSliderChange('Tenure Months', parseInt(e.target.value))}
+              className="w-full accent-cyanAccent cursor-pointer"
             />
-            <div
-              className="absolute top-0 bottom-0 bg-emerald-500 transition-all duration-300 rounded-full"
-              style={{ width: `${simProb * 100}%` }}
+            <div className="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>1 month (New)</span>
+              <span>36 months</span>
+              <span>72 months (Veteran)</span>
+            </div>
+          </div>
+
+          {/* Monthly Charges Slider */}
+          <div className="space-y-2">
+            <div className="flex justify-between items-center text-xs">
+              <label className="text-slate-300 font-medium">Monthly Charges</label>
+              <span className="font-mono text-cyanAccent font-bold text-sm">
+                ${Number(simulated['Monthly Charges']).toFixed(2)} / mo
+              </span>
+            </div>
+            <input
+              type="range"
+              min="18"
+              max="120"
+              step="0.5"
+              value={simulated['Monthly Charges']}
+              onChange={(e) => handleSliderChange('Monthly Charges', parseFloat(e.target.value))}
+              className="w-full accent-cyanAccent cursor-pointer"
             />
+            <div className="flex justify-between text-[10px] font-mono text-slate-400">
+              <span>$18.00 (Base)</span>
+              <span>$65.00</span>
+              <span>$120.00 (Max Premium)</span>
+            </div>
           </div>
-        </div>
-      </div>
 
-      {/* Interactive Simulation Controls Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {/* Retention Lever 1: Contract Type */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-200">Contract Commitment</label>
-            <span className="text-[10px] text-emerald-400 font-mono">High Impact</span>
+          {/* Contract Selector */}
+          <div className="space-y-2">
+            <label className="text-slate-300 font-medium text-xs block">Contract Commitment</label>
+            <div className="grid grid-cols-3 gap-2">
+              {['Month-to-month', 'One year', 'Two year'].map((c) => (
+                <button
+                  key={c}
+                  type="button"
+                  onClick={() => handleSliderChange('Contract', c)}
+                  className={`py-2 px-3 rounded-lg text-xs font-mono font-medium transition-all ${
+                    simulated.Contract === c
+                      ? 'bg-cyanAccent text-navy-950 font-bold shadow-md'
+                      : 'bg-navy-950 border border-navy-700 text-slate-300 hover:border-slate-500'
+                  }`}
+                >
+                  {c}
+                </button>
+              ))}
+            </div>
           </div>
-          <p className="text-xs text-slate-400">Simulate migrating customer to annual commitment.</p>
-          <div className="grid grid-cols-3 gap-2 pt-1">
-            {['Month-to-month', 'One year', 'Two year'].map((ct) => (
-              <button
-                key={ct}
-                type="button"
-                onClick={() => handleSimChange('Contract', ct)}
-                className={`py-2 px-1 text-xs rounded-lg font-medium transition-all ${
-                  simulated.Contract === ct
-                    ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                {ct}
-              </button>
-            ))}
-          </div>
-        </div>
 
-        {/* Retention Lever 2: Tenure Progression */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-200">Customer Tenure</label>
-            <span className="text-xs font-mono text-emerald-400">{simulated['Tenure Months']} Months</span>
-          </div>
-          <p className="text-xs text-slate-400">Simulate longevity survival effect beyond high-hazard early months.</p>
-          <input
-            type="range"
-            min="0"
-            max="72"
-            value={simulated['Tenure Months']}
-            onChange={(e) => handleSimChange('Tenure Months', parseInt(e.target.value))}
-            className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-          />
-          <div className="flex justify-between text-[10px] text-slate-500">
-            <span>0m (New)</span>
-            <span>24m</span>
-            <span>48m</span>
-            <span>72m (Loyal)</span>
-          </div>
-        </div>
-
-        {/* Retention Lever 3: Payment Method */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-200">Payment Friction</label>
-            <span className="text-[10px] text-emerald-400 font-mono">Friction Factor</span>
-          </div>
-          <p className="text-xs text-slate-400">Simulate switching from Electronic Check to Automatic Billing.</p>
-          <select
-            value={simulated['Payment Method']}
-            onChange={(e) => handleSimChange('Payment Method', e.target.value)}
-            className="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
-          >
-            <option value="Electronic check">Electronic check (High Churn)</option>
-            <option value="Mailed check">Mailed check</option>
-            <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
-            <option value="Credit card (automatic)">Credit card (automatic)</option>
-          </select>
-        </div>
-
-        {/* Retention Lever 4: Value-Add Services (Tech Support & Security) */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <label className="text-xs font-semibold text-slate-200 block">Tech Support & Security Bundle</label>
-          <p className="text-xs text-slate-400">Add-on services substantially increase product stickiness.</p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleSimChange('Tech Support', simulated['Tech Support'] === 'Yes' ? 'No' : 'Yes')}
-              className={`py-2 px-3 text-xs rounded-lg font-medium transition-colors ${
-                simulated['Tech Support'] === 'Yes'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  : 'bg-slate-800 text-slate-400'
-              }`}
+          {/* Payment Method Selector */}
+          <div className="space-y-2">
+            <label className="text-slate-300 font-medium text-xs block">Payment Channel</label>
+            <select
+              value={simulated['Payment Method']}
+              onChange={(e) => handleSliderChange('Payment Method', e.target.value)}
+              className="w-full bg-navy-950 border border-navy-700 rounded-lg px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-cyanAccent font-mono"
             >
-              Tech Support: {simulated['Tech Support']}
-            </button>
-            <button
-              type="button"
-              onClick={() => handleSimChange('Online Security', simulated['Online Security'] === 'Yes' ? 'No' : 'Yes')}
-              className={`py-2 px-3 text-xs rounded-lg font-medium transition-colors ${
-                simulated['Online Security'] === 'Yes'
-                  ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'
-                  : 'bg-slate-800 text-slate-400'
-              }`}
-            >
-              Security: {simulated['Online Security']}
-            </button>
+              <option value="Electronic check">Electronic check (Higher risk factor)</option>
+              <option value="Mailed check">Mailed check</option>
+              <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+              <option value="Credit card (automatic)">Credit card (automatic)</option>
+            </select>
           </div>
-        </div>
+        </Card>
 
-        {/* Retention Lever 5: Monthly Price Plan */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <div className="flex items-center justify-between">
-            <label className="text-xs font-semibold text-slate-200">Price Optimization</label>
-            <span className="text-xs font-mono text-emerald-400">${simulated['Monthly Charges']}/mo</span>
-          </div>
-          <p className="text-xs text-slate-400">Simulate promotional discount or plan tier adjustment.</p>
-          <input
-            type="range"
-            min="20"
-            max="120"
-            step="1"
-            value={simulated['Monthly Charges']}
-            onChange={(e) => handleSimChange('Monthly Charges', parseFloat(e.target.value))}
-            className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-emerald-500"
-          />
-          <div className="flex justify-between text-[10px] text-slate-500">
-            <span>$20 (Basic)</span>
-            <span>$70</span>
-            <span>$120 (Premium)</span>
-          </div>
-        </div>
+        {/* Feature Toggles Card */}
+        <Card className="p-6 space-y-6">
+          <h3 className="font-heading font-semibold text-sm text-slate-200 flex items-center gap-2">
+            <ShieldCheck className="h-4 w-4 text-violetSecondary" />
+            Add-on & Service Bundles (Toggles)
+          </h3>
 
-        {/* Retention Lever 6: Billing Friction */}
-        <div className="bg-slate-900 border border-slate-800 rounded-xl p-5 space-y-3">
-          <label className="text-xs font-semibold text-slate-200 block">Paperless Billing</label>
-          <p className="text-xs text-slate-400">Paperless billing configuration toggle.</p>
-          <div className="grid grid-cols-2 gap-2">
-            {['No', 'Yes'].map((val) => (
-              <button
-                key={val}
-                type="button"
-                onClick={() => handleSimChange('Paperless Billing', val)}
-                className={`py-2 px-3 text-xs rounded-lg font-medium transition-colors ${
-                  simulated['Paperless Billing'] === val
-                    ? 'bg-emerald-500 text-white'
-                    : 'bg-slate-800 text-slate-400 hover:text-white'
-                }`}
-              >
-                Paperless: {val}
-              </button>
-            ))}
+          <div className="space-y-3">
+            {[
+              { field: 'Online Security', desc: 'Real-time threat blocking & identity defense' },
+              { field: 'Tech Support', desc: '24/7 dedicated enterprise technical priority' },
+              { field: 'Online Backup', desc: 'Automated off-site cloud storage vault' },
+              { field: 'Device Protection', desc: 'Hardware loss & damage warranty tier' },
+              { field: 'Paperless Billing', desc: 'Direct digital billing statements' },
+            ].map(({ field, desc }) => {
+              const active = simulated[field] === 'Yes';
+              return (
+                <div
+                  key={field}
+                  onClick={() => handleToggle(field)}
+                  className={`p-3 rounded-lg border transition-all cursor-pointer flex items-center justify-between ${
+                    active
+                      ? 'bg-navy-850 border-cyanAccent/40 shadow-inner-glow'
+                      : 'bg-navy-950 border-navy-800 hover:border-navy-700'
+                  }`}
+                >
+                  <div>
+                    <h4 className="text-xs font-mono font-medium text-slate-200 flex items-center gap-2">
+                      <span className={`w-2 h-2 rounded-full ${active ? 'bg-cyanAccent' : 'bg-slate-600'}`} />
+                      {field}
+                    </h4>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{desc}</p>
+                  </div>
+                  <div className={`px-2.5 py-1 rounded text-[11px] font-mono font-bold ${
+                    active ? 'bg-cyanAccent/20 text-cyanAccent' : 'bg-navy-800 text-slate-500'
+                  }`}>
+                    {active ? 'ACTIVE' : 'OFF'}
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        </div>
-      </div>
-
-      {/* Critical Non-Causal Simulation Notice */}
-      <div className="p-4 rounded-xl bg-slate-900 border border-amber-500/30 text-xs text-slate-300 flex items-start gap-3">
-        <Info className="h-5 w-5 text-amber-400 flex-shrink-0 mt-0.5" />
-        <div>
-          <h4 className="font-semibold text-white mb-0.5">Statistical Simulation Disclosure (Non-Causal Notice)</h4>
-          <p className="text-slate-400 text-[11px] leading-relaxed">
-            This simulator passes hypothetically perturbed feature vectors through the fitted XGBoost pipeline. It models what the machine learning algorithm predicts for a customer who possesses these altered attributes. It <strong>does not prove causality</strong> (e.g. Offering a 2-year contract to an unwilling customer does not automatically guarantee they will stay if their underlying satisfaction remains poor).
-          </p>
-        </div>
+        </Card>
       </div>
     </div>
   );

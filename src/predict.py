@@ -108,13 +108,22 @@ class ChurnPredictor:
         med_risk = int((valid_df["risk_tier"] == "MEDIUM").sum())
         low_risk = int((valid_df["risk_tier"] == "LOW").sum())
 
+        skipped_bad_rows = []
+        if len(invalid_df) > 0:
+            for idx, r in invalid_df.iterrows():
+                skipped_bad_rows.append({
+                    "row_index": int(idx),
+                    "reason": str(r.get("validation_errors", "Malformed row"))
+                })
+
         summary = {
             **val_summary,
             "scored_count": len(valid_df),
             "high_risk": high_risk,
             "medium_risk": med_risk,
             "low_risk": low_risk,
-            "mean_probability": round(float(np.mean(probabilities)), 4)
+            "mean_probability": round(float(np.mean(probabilities)), 4),
+            "skipped_bad_rows": skipped_bad_rows
         }
 
         if len(invalid_df) > 0:

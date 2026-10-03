@@ -54,3 +54,13 @@ def test_api_whatif(client):
     assert data["risk_delta"] < 0  # 2-year contract + security reduces risk
     assert "percentage_points_change" in data
     assert "disclaimer" in data
+
+def test_api_customers(client):
+    res = client.get("/analytics/customers?limit=10&offset=0")
+    assert res.status_code == 200
+    data = res.json()
+    assert data["total"] == 7043
+    assert len(data["customers"]) == 10
+    assert "CustomerID" in data["customers"][0]
+    assert "ActualChurn" in data["customers"][0]
+
