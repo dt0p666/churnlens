@@ -23,6 +23,7 @@ import {
   ReferenceLine 
 } from 'recharts';
 import { api } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 import PageHeader from '../components/common/PageHeader';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
@@ -76,10 +77,24 @@ const LOW_RISK_PRESET = {
 };
 
 export default function Predict() {
-  const [profile, setProfile] = useState(HIGH_RISK_PRESET);
+  const { currentCfg, convertUSD, convertToUSD } = useCurrency();
+  const [profile, setProfile] = useState(() => ({
+    ...HIGH_RISK_PRESET,
+    'Monthly Charges': Math.round(convertUSD(HIGH_RISK_PRESET['Monthly Charges']) * 100) / 100,
+    'Total Charges': Math.round(convertUSD(HIGH_RISK_PRESET['Total Charges']) * 100) / 100,
+  }));
   const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+
+  const loadPreset = (preset) => {
+    setProfile({
+      ...preset,
+      'Monthly Charges': Math.round(convertUSD(preset['Monthly Charges']) * 100) / 100,
+      'Total Charges': Math.round(convertUSD(preset['Total Charges']) * 100) / 100,
+    });
+    setResult(null);
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type } = e.target;
@@ -94,7 +109,12 @@ export default function Predict() {
     setLoading(true);
     setError(null);
     try {
-      const data = await api.predictChurn(profile);
+      const payload = {
+        ...profile,
+        'Monthly Charges': convertToUSD(profile['Monthly Charges']),
+        'Total Charges': convertToUSD(profile['Total Charges']),
+      };
+      const data = await api.predictChurn(payload);
       setResult(data);
     } catch (err) {
       console.error(err);
@@ -118,19 +138,19 @@ export default function Predict() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Single Customer Inference"
+        title="Single Customer Scoring"
         subtitle="Individual customer risk evaluation and TreeSHAP attribution factor decomposition."
         action={
           <div className="flex items-center gap-2">
             <span className="text-xs text-slate-400 font-mono">Load Preset:</span>
             <button
-              onClick={() => { setProfile(HIGH_RISK_PRESET); setResult(null); }}
+              onClick={() => loadPreset(HIGH_RISK_PRESET)}
               className="px-2.5 py-1 text-xs font-mono font-medium rounded-lg bg-rose-500/10 text-rose-300 border border-rose-500/30 hover:bg-rose-500/20 transition-colors"
             >
               High Risk
             </button>
             <button
-              onClick={() => { setProfile(LOW_RISK_PRESET); setResult(null); }}
+              onClick={() => loadPreset(LOW_RISK_PRESET)}
               className="px-2.5 py-1 text-xs font-mono font-medium rounded-lg bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/20 transition-colors"
             >
               Low Risk
@@ -205,7 +225,7 @@ export default function Predict() {
               {/* Account & Billing */}
               <div>
                 <h3 className="text-xs font-mono uppercase tracking-wider text-slate-300 font-semibold mb-3 pb-1 border-b border-navy-800 flex items-center gap-2">
-                  <span className="h-1.5 w-1.5 rounded-full bg-violetSecondary" />
+                  <span className="h-1.5 w-1.5 rounded-full bg-cyanAccent" />
                   Contract & Financials
                 </h3>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
@@ -252,7 +272,7 @@ export default function Predict() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs mt-3">
                   <div>
-                    <label className="text-slate-400 block mb-1">Monthly Charges ($)</label>
+                    <label className="text-slate-400 block mb-1">Monthly Charges ({currentCfg.symbol})</label>
                     <input
                       type="number"
                       step="0.05"
@@ -263,7 +283,7 @@ export default function Predict() {
                     />
                   </div>
                   <div>
-                    <label className="text-slate-400 block mb-1">Total Charges ($)</label>
+                    <label className="text-slate-400 block mb-1">Total Charges ({currentCfg.symbol})</label>
                     <input
                       type="number"
                       step="0.05"
@@ -358,12 +378,12 @@ export default function Predict() {
                   {loading ? (
                     <>
                       <RefreshCw className="h-4 w-4 animate-spin text-navy-950" />
-                      Evaluating Neural Tree Weights...
+                      Computing Model Score...
                     </>
                   ) : (
                     <>
                       <Zap className="h-4 w-4 fill-navy-950" />
-                      Run Production Inference
+                      Score Profile
                     </>
                   )}
                 </Button>
@@ -507,8 +527,8 @@ export default function Predict() {
             <Card className="p-8 h-96 flex flex-col items-center justify-center text-center">
               <EmptyState
                 icon={Sparkles}
-                title="Awaiting Execution"
-                description="Configure the customer parameters on the left or select a preset, then click 'Run Production Inference'."
+                title="Awaiting Input"
+                description="Configure customer attributes or load a preset, then click 'Score Profile' to calculate churn risk."
               />
             </Card>
           )}

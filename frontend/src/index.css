@@ -6,17 +6,14 @@
 
 @layer base {
   body {
-    @apply bg-navy-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-cyanAccent selection:text-navy-950;
-    background-color: #070B14;
-    background-image: 
-      radial-gradient(at 0% 0%, rgba(34, 211, 238, 0.05) 0px, transparent 50%),
-      radial-gradient(at 100% 0%, rgba(139, 92, 246, 0.06) 0px, transparent 50%),
-      radial-gradient(at 50% 100%, rgba(34, 211, 238, 0.03) 0px, transparent 50%);
-    background-attachment: fixed;
+    @apply bg-navy-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-cyanAccent/40 selection:text-slate-100;
+    background-color: #FEFAE0;
+    color: #1C1917;
   }
 
   h1, h2, h3, h4, .font-heading {
     font-family: 'Space Grotesk', sans-serif;
+    color: #1C1917;
   }
 
   .font-mono {
@@ -24,18 +21,18 @@
   }
 }
 
-/* Subtle enterprise scrollbar */
+/* Warm Sage & Sand scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #070B14;
+  background: #FEFAE0;
 }
 ::-webkit-scrollbar-thumb {
-  background: #15223C;
+  background: #CCD5AE;
   border-radius: 4px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #1E3258;
+  background: #D4A373;
 }

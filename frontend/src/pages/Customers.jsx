@@ -15,6 +15,7 @@ import {
   Info
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 import PageHeader from '../components/common/PageHeader';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
@@ -25,6 +26,7 @@ import EmptyState from '../components/common/EmptyState';
 
 export default function Customers() {
   const navigate = useNavigate();
+  const { formatMoney } = useCurrency();
   const [customers, setCustomers] = useState([]);
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
@@ -89,8 +91,8 @@ export default function Customers() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Customer Intelligence Directory"
-        subtitle="Live customer cohort directory with real-time SHAP risk attribution and instant counterfactual simulation."
+        title="Customer Directory"
+        subtitle="Customer cohort directory with live model scoring, SHAP risk drivers, and counterfactual simulation."
       />
 
       {/* Filter and Search Bar */}
@@ -147,7 +149,7 @@ export default function Customers() {
             </span>
           </div>
           <span className="text-[11px] text-slate-400 font-mono">
-            Click any row to launch radar inspection
+            Click row to view profile & SHAP attribution
           </span>
         </div>
 
@@ -216,10 +218,10 @@ export default function Customers() {
                         {cust['Internet Service']}
                       </td>
                       <td className="py-3 px-4 font-mono font-medium text-slate-200">
-                        ${Number(cust['Monthly Charges']).toFixed(2)}
+                        {formatMoney(cust['Monthly Charges'])}
                       </td>
                       <td className="py-3 px-4 font-mono text-slate-400">
-                        ${Number(cust['Total Charges']).toFixed(2)}
+                        {formatMoney(cust['Total Charges'])}
                       </td>
                       <td className="py-3 px-4">
                         {cust.ActualChurn === 1 ? (
@@ -268,13 +270,13 @@ export default function Customers() {
                     <span className="text-[10px] font-mono uppercase tracking-widest text-cyanAccent">
                       Inspection Radar
                     </span>
-                    <h2 className="text-lg font-heading font-bold text-white flex items-center gap-2">
+                    <h2 className="text-lg font-heading font-bold text-slate-100 flex items-center gap-2">
                       Customer #{selectedCustomer.CustomerID}
                     </h2>
                   </div>
                   <button
                     onClick={() => setSelectedCustomer(null)}
-                    className="p-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 text-slate-400 hover:text-white transition-colors"
+                    className="p-1.5 rounded-lg bg-navy-800 hover:bg-navy-700 text-slate-400 hover:text-slate-100 transition-colors"
                   >
                     <X className="h-5 w-5" />
                   </button>
@@ -381,7 +383,7 @@ export default function Customers() {
                     </div>
                     <div className="p-2 rounded bg-navy-950 border border-navy-800/60">
                       <span className="text-slate-500 block text-[10px]">Monthly Charges</span>
-                      <span className="text-slate-200 font-medium">${selectedCustomer['Monthly Charges']}</span>
+                      <span className="text-slate-200 font-medium">{formatMoney(selectedCustomer['Monthly Charges'])}</span>
                     </div>
                     <div className="p-2 rounded bg-navy-950 border border-navy-800/60">
                       <span className="text-slate-500 block text-[10px]">Payment Method</span>

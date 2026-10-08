@@ -12,7 +12,7 @@ export default function EmptyState({
       <div className="p-3 rounded-full bg-navy-800 border border-navy-700 text-slate-400 mb-3">
         <Icon className="h-6 w-6 stroke-1" />
       </div>
-      <h4 className="text-sm font-semibold font-heading text-white">{title}</h4>
+      <h4 className="text-sm font-semibold font-heading text-slate-100">{title}</h4>
       <p className="text-xs text-slate-400 mt-1 max-w-sm">{description}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>

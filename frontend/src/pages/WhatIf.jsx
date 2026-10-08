@@ -15,6 +15,7 @@ import {
   CheckCircle2
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 import PageHeader from '../components/common/PageHeader';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
@@ -46,6 +47,7 @@ const DEFAULT_PROFILE = {
 
 export default function WhatIf() {
   const location = useLocation();
+  const { formatMoney } = useCurrency();
   const initialData = location.state?.initialCustomer || DEFAULT_PROFILE;
 
   // Baseline is fixed to the starting customer profile
@@ -139,11 +141,16 @@ export default function WhatIf() {
   const delta = simResult?.percentage_points_change ?? 0;
   const isReduced = delta < 0;
 
+  // Track modified fields
+  const changedFields = Object.keys(simulated).filter(
+    (k) => simulated[k] !== baseline[k]
+  );
+
   return (
     <div className="space-y-6">
       <PageHeader
-        title="What-If Counterfactual Simulator"
-        subtitle="Simulate policy and contractual interventions on the XGBoost decision surface to observe projected churn probability shifts."
+        title="What-If Simulator"
+        subtitle="Simulate contractual and service changes to evaluate projected risk shifts on the model decision boundary."
         action={
           <div className="flex items-center gap-2">
             <Button
@@ -153,7 +160,7 @@ export default function WhatIf() {
               className="flex items-center gap-1.5"
             >
               <RotateCcw className="h-3.5 w-3.5" />
-              Revert to Baseline
+              Reset to Baseline
             </Button>
           </div>
         }
@@ -161,6 +168,22 @@ export default function WhatIf() {
 
       {/* Flagship Side-by-Side Dual Gauges */}
       <Card className="p-6 relative overflow-hidden bg-navy-900/80 backdrop-blur-md border border-navy-750">
+        {changedFields.length > 0 && (
+          <div className="mb-4 pb-3 border-b border-navy-800/80 flex flex-wrap items-center gap-2 text-xs">
+            <span className="font-mono text-cyanAccent font-medium text-[11px] uppercase tracking-wider">
+              {changedFields.length} Modified Attribute{changedFields.length > 1 ? 's' : ''}:
+            </span>
+            {changedFields.map((f) => (
+              <span
+                key={f}
+                className="px-2 py-0.5 rounded text-[11px] font-mono bg-navy-800 border border-navy-700 text-slate-200"
+              >
+                {f}: <span className="text-cyanAccent">{String(simulated[f])}</span>
+              </span>
+            ))}
+          </div>
+        )}
+
         <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
           
           {/* Baseline Gauge */}
@@ -177,14 +200,14 @@ export default function WhatIf() {
             </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant={simResult?.baseline_risk_tier?.toLowerCase() || 'medium'}>
-                {simResult?.baseline_risk_tier || 'COMPUTING'}
+                {simResult?.baseline_risk_tier || 'CALCULATING'}
               </Badge>
               <span className="text-xs font-mono text-slate-400">
                 Baseline Risk
               </span>
             </div>
             <p className="text-[11px] font-mono text-slate-400 mt-2">
-              {baseline.Contract} &bull; {baseline['Tenure Months']}m tenure &bull; ${baseline['Monthly Charges']}/mo
+              {baseline.Contract} &bull; {baseline['Tenure Months']}m tenure &bull; {formatMoney(baseline['Monthly Charges'])}/mo
             </p>
           </div>
 
@@ -197,7 +220,7 @@ export default function WhatIf() {
               key={delta}
               initial={{ scale: 0.85, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.3 }}
+              transition={{ duration: 0.25 }}
               className={`flex items-center gap-1.5 px-3 py-1.5 rounded-xl font-mono text-base font-bold ${
                 isReduced
                   ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30'
@@ -236,14 +259,14 @@ export default function WhatIf() {
             </div>
             <div className="flex items-center gap-2 mt-2">
               <Badge variant={simResult?.simulated_risk_tier?.toLowerCase() || 'medium'}>
-                {simResult?.simulated_risk_tier || 'COMPUTING'}
+                {simResult?.simulated_risk_tier || 'CALCULATING'}
               </Badge>
               <span className="text-xs font-mono text-slate-400">
                 Projected Risk
               </span>
             </div>
             <p className="text-[11px] font-mono text-slate-400 mt-2">
-              {simulated.Contract} &bull; {simulated['Tenure Months']}m tenure &bull; ${simulated['Monthly Charges']}/mo
+              {simulated.Contract} &bull; {simulated['Tenure Months']}m tenure &bull; {formatMoney(simulated['Monthly Charges'])}/mo
             </p>
           </div>
         </div>
@@ -253,7 +276,7 @@ export default function WhatIf() {
           <Info className="h-4 w-4 text-cyanAccent flex-shrink-0 mt-0.5" />
           <p className="text-xs text-slate-400 leading-relaxed font-sans">
             <strong className="text-slate-200">Model simulation, not a causal prediction.</strong>{' '}
-            Counterfactual calculations evaluate the XGBoost decision surface under modified covariate values. They illustrate how the statistical model estimates risk for these attributes, but do not guarantee physical retention causation in the absence of randomized control trials.
+            Counterfactual calculations evaluate the model decision boundary under modified covariate values. They illustrate how the model estimates risk for these attributes, but do not guarantee physical retention causation.
           </p>
         </div>
       </Card>
@@ -323,7 +346,7 @@ export default function WhatIf() {
             <div className="flex justify-between items-center text-xs">
               <label className="text-slate-300 font-medium">Monthly Charges</label>
               <span className="font-mono text-cyanAccent font-bold text-sm">
-                ${Number(simulated['Monthly Charges']).toFixed(2)} / mo
+                {formatMoney(simulated['Monthly Charges'])} / mo
               </span>
             </div>
             <input
@@ -336,9 +359,9 @@ export default function WhatIf() {
               className="w-full accent-cyanAccent cursor-pointer"
             />
             <div className="flex justify-between text-[10px] font-mono text-slate-400">
-              <span>$18.00 (Base)</span>
-              <span>$65.00</span>
-              <span>$120.00 (Max Premium)</span>
+              <span>{formatMoney(18)} (Base)</span>
+              <span>{formatMoney(65)}</span>
+              <span>{formatMoney(120)} (Max)</span>
             </div>
           </div>
 
@@ -382,7 +405,7 @@ export default function WhatIf() {
         {/* Feature Toggles Card */}
         <Card className="p-6 space-y-6">
           <h3 className="font-heading font-semibold text-sm text-slate-200 flex items-center gap-2">
-            <ShieldCheck className="h-4 w-4 text-violetSecondary" />
+            <ShieldCheck className="h-4 w-4 text-cyanAccent" />
             Add-on & Service Bundles (Toggles)
           </h3>
 

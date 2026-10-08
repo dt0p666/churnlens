@@ -12,34 +12,50 @@ export default {
         mono: ['JetBrains Mono', 'monospace'],
       },
       colors: {
+        palette: {
+          sage: '#CCD5AE',
+          matcha: '#E9EDC9',
+          cream: '#FEFAE0',
+          sand: '#FAEDCD',
+          caramel: '#D4A373',
+        },
         navy: {
-          950: '#070B14', // deep space navy background
-          900: '#0B1120', // card surface
-          850: '#0E172B', // elevated surface
-          800: '#15223C', // borders & lines
-          700: '#1E3258', // interactive borders
+          950: '#FEFAE0', // main background canvas (Warm Cream)
+          900: '#FAEDCD', // card surfaces (Warm Sand / Biscuit)
+          850: '#F5E6BF', // elevated surface
+          800: '#CCD5AE', // borders & divider lines (Sage)
+          750: '#BFCB9D', // hover borders
+          700: '#A4B081', // active borders
         },
         cyanAccent: {
-          DEFAULT: '#22D3EE',
-          light: '#67E8F9',
-          dark: '#0891B2',
-          glow: 'rgba(34, 211, 238, 0.15)',
+          DEFAULT: '#D4A373', // Warm Caramel primary action accent
+          light: '#DEB58D',
+          dark: '#BA8957',
+          glow: 'rgba(212, 163, 115, 0.25)',
         },
-        violetAccent: {
-          DEFAULT: '#8B5CF6',
-          light: '#A78BFA',
-          dark: '#6D28D9',
+        slate: {
+          50: '#0C0A09',
+          100: '#1C1917', // Primary body & heading text (Deep Stone Charcoal)
+          200: '#292524',
+          300: '#44403C',
+          400: '#57534E', // Muted labels
+          500: '#78716C', // Secondary text
+          600: '#A8A29E',
+          700: '#CCD5AE',
+          800: '#E9EDC9',
+          900: '#FAEDCD',
+          950: '#FEFAE0',
         },
         risk: {
-          high: '#F43F5E',    // coral/red
-          medium: '#F59E0B',  // amber
-          low: '#10B981',     // emerald
+          high: '#DC2626',    // Warm crimson
+          medium: '#D97706',  // Warm amber
+          low: '#15803D',     // Warm olive green
         }
       },
       boxShadow: {
-        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.06)',
-        'cyan-glow': '0 0 25px rgba(34, 211, 238, 0.2)',
-        'card': '0 8px 30px rgba(0, 0, 0, 0.35)',
+        'inner-glow': 'inset 0 1px 0 rgba(255, 255, 255, 0.4)',
+        'cyan-glow': '0 0 12px rgba(212, 163, 115, 0.2)',
+        'card': '0 2px 8px rgba(44, 38, 25, 0.05)',
       }
     },
   },

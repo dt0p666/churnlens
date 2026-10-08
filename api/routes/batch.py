@@ -6,6 +6,7 @@ import pandas as pd
 
 from api.dependencies import get_predictor
 from src.predict import ChurnPredictor
+from src.currency import convert_to_usd
 
 router = APIRouter(prefix="/predict", tags=["Batch Prediction"])
 
@@ -13,6 +14,7 @@ router = APIRouter(prefix="/predict", tags=["Batch Prediction"])
 async def predict_batch_csv(
     file: UploadFile = File(...),
     threshold: Optional[float] = Query(None, ge=0.01, le=0.99),
+    currency: str = Query("USD", description="Currency of uploaded Monthly Charges and Total Charges"),
     download_csv: bool = Query(False),
     predictor: ChurnPredictor = Depends(get_predictor)
 ):
@@ -22,6 +24,14 @@ async def predict_batch_csv(
     try:
         contents = await file.read()
         df = pd.read_csv(io.BytesIO(contents))
+
+        # Convert charges to USD if uploaded in another currency
+        if currency.upper() != "USD":
+            for col in ["Monthly Charges", "MonthlyCharges", "Total Charges", "TotalCharges"]:
+                if col in df.columns:
+                    df[col] = pd.to_numeric(df[col], errors="coerce").apply(
+                        lambda x: convert_to_usd(x, currency) if pd.notna(x) else x
+                    )
 
         scored_df, summary = predictor.predict_batch(df, custom_threshold=threshold)
 

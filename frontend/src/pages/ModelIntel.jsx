@@ -35,6 +35,7 @@ import {
   AreaChart
 } from 'recharts';
 import { api } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 import PageHeader from '../components/common/PageHeader';
 import Card from '../components/common/Card';
 import ChartCard from '../components/common/ChartCard';
@@ -51,6 +52,7 @@ const TABS = [
 ];
 
 export default function ModelIntel() {
+  const { formatMoney, currentCfg } = useCurrency();
   const [activeTab, setActiveTab] = useState('diagnostics');
   const [modelData, setModelData] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -170,7 +172,7 @@ export default function ModelIntel() {
       <PageHeader
         title="Model Intelligence & Engineering Specification"
         subtitle="Complete cross-validation benchmarks, probability calibration, cost-optimal decision boundaries, and Population Stability Index (PSI) drift tracking."
-        badge="PRODUCTION VERIFIED &bull; XGBoost v1.0.0"
+        badge="PRODUCTION VERIFIED"
       />
 
       {/* Navigation Tabs */}
@@ -284,7 +286,7 @@ export default function ModelIntel() {
                 </div>
                 <div className="p-3 rounded-xl bg-navy-950/70 border border-navy-800 text-center">
                   <span className="text-[10px] font-mono uppercase text-slate-400 block">F1 Score</span>
-                  <span className="text-lg font-mono font-bold text-violetSecondary">
+                  <span className="text-lg font-mono font-bold text-cyanAccent">
                     {(activeThreshData.f1 * 100).toFixed(1)}%
                   </span>
                   <span className="text-[10px] text-slate-500 block mt-1">Harmonic balance</span>
@@ -343,7 +345,7 @@ export default function ModelIntel() {
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={rocPoints} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} />
                     <XAxis
                       dataKey="fpr"
                       stroke="#64748B"
@@ -387,7 +389,7 @@ export default function ModelIntel() {
               <div className="h-64 w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={prPoints} margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} />
                     <XAxis
                       dataKey="recall"
                       stroke="#64748B"
@@ -406,7 +408,7 @@ export default function ModelIntel() {
                         const d = payload[0].payload;
                         return (
                           <div className="bg-navy-950 border border-navy-700 p-2 rounded-lg text-xs font-mono shadow-xl">
-                            <p className="text-violetSecondary">Precision: {(d.precision * 100).toFixed(1)}%</p>
+                            <p className="text-cyanAccent">Precision: {(d.precision * 100).toFixed(1)}%</p>
                             <p className="text-slate-400">Recall: {(d.recall * 100).toFixed(1)}%</p>
                           </div>
                         );
@@ -415,7 +417,7 @@ export default function ModelIntel() {
                     <Line
                       type="monotone"
                       dataKey="precision"
-                      stroke="#8B5CF6"
+                      stroke="#0EA5E9"
                       strokeWidth={2.5}
                       dot={false}
                     />
@@ -430,7 +432,7 @@ export default function ModelIntel() {
             <div className="lg:col-span-7">
               <ChartCard
                 title="Global Feature Importance"
-                subtitle="Top tree split gain contributions across XGBoost estimators"
+                subtitle="Top tree split gain contributions across ensemble estimators"
               >
                 <div className="h-72 w-full">
                   <ResponsiveContainer width="100%" height="100%">
@@ -583,7 +585,7 @@ export default function ModelIntel() {
             <div className="h-80 w-full mt-4">
               <ResponsiveContainer width="100%" height="100%">
                 <LineChart margin={{ top: 10, right: 20, left: 0, bottom: 10 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} />
                   <XAxis
                     dataKey="pred"
                     type="number"
@@ -632,7 +634,7 @@ export default function ModelIntel() {
                     stroke="#F43F5E"
                     strokeWidth={2}
                     dot={{ r: 3, fill: '#F43F5E' }}
-                    name="Uncalibrated XGBoost"
+                    name="Uncalibrated Baseline"
                   />
                   {/* Calibrated curve */}
                   <Line
@@ -695,7 +697,7 @@ export default function ModelIntel() {
               <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 space-y-2">
                 <div className="flex justify-between text-xs">
                   <label className="text-slate-300">Cost of Missed Churner (FN)</label>
-                  <span className="font-mono text-rose-400 font-bold">${costMissedChurner}</span>
+                  <span className="font-mono text-rose-400 font-bold">{formatMoney(costMissedChurner)}</span>
                 </div>
                 <input
                   type="range"
@@ -712,7 +714,7 @@ export default function ModelIntel() {
               <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 space-y-2">
                 <div className="flex justify-between text-xs">
                   <label className="text-slate-300">Wasted Offer Cost (FP)</label>
-                  <span className="font-mono text-amber-400 font-bold">${costRetentionOffer}</span>
+                  <span className="font-mono text-amber-400 font-bold">{formatMoney(costRetentionOffer)}</span>
                 </div>
                 <input
                   type="range"
@@ -729,7 +731,7 @@ export default function ModelIntel() {
               <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 space-y-2">
                 <div className="flex justify-between text-xs">
                   <label className="text-slate-300">Outreach Operations Cost (TP)</label>
-                  <span className="font-mono text-cyanAccent font-bold">${costOutreach}</span>
+                  <span className="font-mono text-cyanAccent font-bold">{formatMoney(costOutreach)}</span>
                 </div>
                 <input
                   type="range"
@@ -751,12 +753,12 @@ export default function ModelIntel() {
               <div className="lg:col-span-8">
                 <ChartCard
                   title="Total Expected Business Cost Curve"
-                  subtitle={`Optimal Threshold = ${costData.optimal_threshold} &bull; Minimizes total net misclassification loss`}
+                  subtitle={`Optimal Threshold = ${costData.optimal_threshold} • Minimizes total net misclassification loss`}
                 >
                   <div className="h-72 w-full">
                     <ResponsiveContainer width="100%" height="100%">
                       <LineChart data={costData.cost_curve} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
-                        <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                        <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} />
                         <XAxis
                           dataKey="threshold"
                           stroke="#64748B"
@@ -767,8 +769,8 @@ export default function ModelIntel() {
                         <YAxis
                           stroke="#64748B"
                           tick={{ fill: '#94A3B8', fontSize: 10, fontFamily: 'JetBrains Mono' }}
-                          tickFormatter={(v) => `$${(v / 1000).toFixed(0)}k`}
-                          label={{ value: 'Total Net Cost ($)', angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 10 }}
+                          tickFormatter={(v) => formatMoney(v, { compact: true })}
+                          label={{ value: `Total Net Cost (${currentCfg.symbol})`, angle: -90, position: 'insideLeft', fill: '#64748B', fontSize: 10 }}
                         />
                         <Tooltip
                           content={({ active, payload }) => {
@@ -777,9 +779,9 @@ export default function ModelIntel() {
                             return (
                               <div className="bg-navy-950 border border-navy-700 p-2.5 rounded-lg text-xs font-mono shadow-xl">
                                 <p className="text-slate-200 font-bold">Threshold: {d.threshold}</p>
-                                <p className="text-cyanAccent">Total Cost: ${d.net_cost.toLocaleString()}</p>
-                                <p className="text-rose-400">Lost LTV: ${d.lost_ltv.toLocaleString()}</p>
-                                <p className="text-amber-400">Wasted Discounts: ${d.wasted_discounts.toLocaleString()}</p>
+                                <p className="text-cyanAccent">Total Cost: {formatMoney(d.net_cost)}</p>
+                                <p className="text-rose-400">Lost LTV: {formatMoney(d.lost_ltv)}</p>
+                                <p className="text-amber-400">Wasted Discounts: {formatMoney(d.wasted_discounts)}</p>
                               </div>
                             );
                           }}
@@ -820,31 +822,31 @@ export default function ModelIntel() {
                       <div className="p-3 rounded-lg bg-navy-950 border border-navy-800">
                         <span className="text-[10px] font-mono text-slate-400">Default (0.50) Expected Cost</span>
                         <div className="text-lg font-mono font-bold text-slate-300">
-                          ${costData.baseline_05_cost.toLocaleString()}
+                          {formatMoney(costData.baseline_05_cost)}
                         </div>
                       </div>
 
                       <div className="p-3 rounded-lg bg-emerald-500/10 border border-emerald-500/30">
                         <span className="text-[10px] font-mono text-emerald-300">Cost-Optimal ({costData.optimal_threshold}) Cost</span>
                         <div className="text-lg font-mono font-bold text-emerald-400">
-                          ${costData.optimal_cost.toLocaleString()}
+                          {formatMoney(costData.optimal_cost)}
                         </div>
                       </div>
 
                       <div className="p-3 rounded-lg bg-cyanAccent/10 border border-cyanAccent/30">
                         <span className="text-[10px] font-mono text-cyanAccent">Net Financial Savings</span>
                         <div className="text-xl font-mono font-bold text-cyanAccent flex items-center gap-1 mt-1">
-                          +${costData.estimated_savings_vs_05.toLocaleString()}
+                          +{formatMoney(costData.estimated_savings_vs_05)}
                         </div>
                         <span className="text-[10px] text-slate-400 block mt-1">
-                          Gained purely by moving from arbitrary 0.5 to business-optimal threshold.
+                          Gained by moving from arbitrary 0.5 to cost-optimal threshold.
                         </span>
                       </div>
                     </div>
                   </div>
 
                   <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 text-[10px] text-slate-400 mt-4">
-                    Assumptions reflect current parameters: $500 lost customer LTV vs $50 wasted retention offer.
+                    Assumptions reflect current parameters: {formatMoney(costMissedChurner)} lost customer LTV vs {formatMoney(costRetentionOffer)} wasted retention offer.
                   </div>
                 </Card>
               </div>
@@ -910,7 +912,7 @@ export default function ModelIntel() {
 
                 <div className="p-3 rounded-lg bg-navy-950 border border-navy-800 text-center">
                   <span className="text-[10px] font-mono uppercase text-slate-400 block">Precision @ k</span>
-                  <span className="text-lg font-mono font-bold text-violetSecondary">
+                  <span className="text-lg font-mono font-bold text-cyanAccent">
                     {(retentionData.user_query.precision_at_k * 100).toFixed(1)}%
                   </span>
                   <span className="text-[10px] text-slate-500 block">Hit-rate among contacted</span>
@@ -929,7 +931,7 @@ export default function ModelIntel() {
               <div className="h-64 w-full pt-4">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={retentionData.gain_chart} margin={{ top: 10, right: 20, left: 10, bottom: 10 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} />
                     <XAxis
                       dataKey="contact_percentage"
                       stroke="#64748B"
@@ -1008,7 +1010,7 @@ export default function ModelIntel() {
                   className={`px-3 py-1.5 rounded-lg text-xs font-mono font-bold transition-all flex items-center gap-2 ${
                     simulateShift
                       ? 'bg-rose-500 text-white shadow-lg shadow-rose-500/20'
-                      : 'bg-navy-800 border border-navy-700 text-slate-300 hover:text-white'
+                      : 'bg-navy-800 border border-navy-700 text-slate-300 hover:text-slate-100'
                   }`}
                 >
                   {simulateShift ? <AlertTriangle className="h-3.5 w-3.5" /> : <RefreshCw className="h-3.5 w-3.5" />}

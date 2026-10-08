@@ -30,7 +30,7 @@ export default function Badge({ tier = 'LOW', size = 'md' }) {
   const sizeClasses = size === 'sm' ? 'px-2 py-0.5 text-[10px]' : 'px-2.5 py-1 text-xs';
 
   return (
-    <span className={`inline-flex items-center gap-1.5 rounded-full font-mono font-semibold border ${sizeClasses} ${current.bg}`}>
+    <span className={`inline-flex items-center gap-1.5 rounded-md font-mono font-semibold border ${sizeClasses} ${current.bg}`}>
       <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${current.dot}`}></span>
       {current.label}
     </span>

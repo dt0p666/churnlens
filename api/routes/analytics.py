@@ -162,3 +162,61 @@ def get_customers(
         "customers": customers
     }
 
+@lru_cache()
+def get_scored_sample_dataset():
+    """
+    Computes real model predictions across a diverse sample of 300 real customers
+    for the Customer Risk Map scatter plot and top risk feed.
+    """
+    import joblib
+    pipeline_path = config.MODELS_DIR / "pipeline.joblib"
+    if not pipeline_path.exists():
+        return []
+
+    pipeline = joblib.load(pipeline_path)
+    df = load_raw_dataset()
+
+    # Stratified representative sample of 300 real accounts
+    sample_df = df.sample(n=min(300, len(df)), random_state=42).copy()
+
+    cols_needed = config.CATEGORICAL_COLS + config.NUMERICAL_COLS
+    sub_features = sample_df[cols_needed].copy()
+    sub_features["Total Charges"] = sample_df["Total Charges Clean"]
+
+    probs = pipeline.predict_proba(sub_features)[:, 1]
+    sample_df["churn_probability"] = np.round(probs, 4)
+
+    records = []
+    for idx, row in sample_df.iterrows():
+        p = float(row["churn_probability"])
+        tier = "HIGH" if p >= 0.60 else ("MEDIUM" if p >= 0.35 else "LOW")
+        records.append({
+            "customer_id": str(row["CustomerID"]),
+            "tenure": int(row["Tenure Months"]),
+            "monthly_charges": round(float(row["Monthly Charges"]), 2),
+            "total_charges": round(float(row["Total Charges Clean"]), 2),
+            "churn_probability": p,
+            "risk_tier": tier,
+            "contract": str(row["Contract"]),
+            "internet_service": str(row["Internet Service"]),
+            "payment_method": str(row["Payment Method"]),
+            "actual_churn": int(row[config.TARGET_COL])
+        })
+    return records
+
+@router.get("/risk-map")
+def get_customer_risk_map() -> List[Dict[str, Any]]:
+    """
+    Returns real scored customers for the Tenure vs Monthly Charges risk map scatter plot.
+    """
+    return get_scored_sample_dataset()
+
+@router.get("/top-risk-feed")
+def get_top_risk_feed(limit: int = 8) -> List[Dict[str, Any]]:
+    """
+    Returns top highest-risk real customers from the scored dataset for the live risk feed.
+    """
+    scored = get_scored_sample_dataset()
+    sorted_by_risk = sorted(scored, key=lambda x: x["churn_probability"], reverse=True)
+    return sorted_by_risk[:limit]
+

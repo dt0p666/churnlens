@@ -8,11 +8,11 @@ export default function StatCard({
   subtitle,
   icon: Icon,
   trend,
-  color = 'cyan', // 'cyan' | 'violet' | 'rose' | 'amber' | 'emerald'
+  color = 'cyan', // 'cyan' | 'slate' | 'rose' | 'amber' | 'emerald'
 }) {
   const accentConfigs = {
     cyan: 'text-cyanAccent bg-cyanAccent/10 border-cyanAccent/20',
-    violet: 'text-violetAccent-light bg-violetAccent/10 border-violetAccent/20',
+    slate: 'text-slate-300 bg-slate-800/60 border-slate-700/60',
     rose: 'text-rose-400 bg-rose-500/10 border-rose-500/20',
     amber: 'text-amber-400 bg-amber-500/10 border-amber-500/20',
     emerald: 'text-emerald-400 bg-emerald-500/10 border-emerald-500/20',
@@ -32,7 +32,7 @@ export default function StatCard({
 
         <div className="flex items-baseline gap-2">
           <motion.span
-            className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-white"
+            className="text-2xl sm:text-3xl font-extrabold font-mono tracking-tight text-slate-100"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
@@ -40,9 +40,15 @@ export default function StatCard({
             {value}
           </motion.span>
           {trend && (
-            <span className={`text-xs font-mono font-semibold ${trend > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
-              {trend > 0 ? '+' : ''}{trend}%
-            </span>
+            typeof trend === 'object' ? (
+              <span className={`text-xs font-mono font-semibold ${trend.direction === 'up' ? 'text-rose-400' : 'text-emerald-400'}`}>
+                {trend.value}
+              </span>
+            ) : (
+              <span className={`text-xs font-mono font-semibold ${Number(trend) > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
+                {Number(trend) > 0 ? '+' : ''}{trend}%
+              </span>
+            )
           )}
         </div>
       </div>

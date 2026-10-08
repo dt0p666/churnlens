@@ -14,6 +14,7 @@ import {
   ArrowRight
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useCurrency } from '../context/CurrencyContext';
 import PageHeader from '../components/common/PageHeader';
 import Card from '../components/common/Card';
 import Badge from '../components/common/Badge';
@@ -23,13 +24,15 @@ import EmptyState from '../components/common/EmptyState';
 
 const PIPELINE_STEPS = [
   { id: 1, label: 'Upload CSV' },
-  { id: 2, label: 'Schema Validation' },
-  { id: 3, label: 'Pipeline Scoring' },
-  { id: 4, label: 'Audit & Export' },
+  { id: 2, label: 'Validation' },
+  { id: 3, label: 'Model Scoring' },
+  { id: 4, label: 'Export' },
 ];
 
 export default function Batch() {
+  const { currency: displayCurrency, formatMoney, rates } = useCurrency();
   const [file, setFile] = useState(null);
+  const [fileCurrency, setFileCurrency] = useState('USD');
   const [loading, setLoading] = useState(false);
   const [activeStep, setActiveStep] = useState(1);
   const [summary, setSummary] = useState(null);
@@ -64,13 +67,12 @@ export default function Batch() {
     setActiveStep(2);
 
     try {
-      // Simulate fast validation step transition
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 350));
       setActiveStep(3);
 
-      const data = await api.predictBatch(file, null);
+      const data = await api.predictBatch(file, null, fileCurrency);
       
-      await new Promise(r => setTimeout(r, 400));
+      await new Promise(r => setTimeout(r, 350));
       setActiveStep(4);
 
       setSummary(data.summary);
@@ -90,7 +92,7 @@ export default function Batch() {
     const fd = new FormData();
     fd.append('file', file);
 
-    fetch(`${API_BASE_URL}/predict/batch?download_csv=true`, {
+    fetch(`${API_BASE_URL}/predict/batch?download_csv=true&currency=${fileCurrency}`, {
       method: 'POST',
       body: fd,
     })
@@ -110,8 +112,8 @@ export default function Batch() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Batch Scoring & Pipeline Ingestion"
-        subtitle="Vectorized scoring of multi-record customer datasets with row-level quarantine validation and audit enrichment."
+        title="Batch Scoring"
+        subtitle="Upload customer datasets for batch model scoring, validation quarantine, and CSV export."
       />
 
       {/* Animated Pipeline Steps Tracker */}
@@ -173,9 +175,28 @@ export default function Batch() {
           </h3>
           <p className="text-xs text-slate-400 mt-1 max-w-sm">
             {file
-              ? `File size: ${(file.size / 1024).toFixed(1)} KB — Ready to score.`
+              ? `File size: ${(file.size / 1024).toFixed(1)} KB: Ready to score.`
               : 'Drag and drop your file here, or click browse below. Expects standard Telco customer features.'}
           </p>
+
+          {/* File Currency Selection */}
+          <div className="mt-4 flex flex-col sm:flex-row items-center gap-2 text-xs">
+            <span className="text-slate-400 font-mono">File Currency:</span>
+            <select
+              value={fileCurrency}
+              onChange={(e) => setFileCurrency(e.target.value)}
+              className="bg-navy-900 border border-navy-700 rounded-lg px-2.5 py-1.5 text-slate-200 text-xs font-mono focus:border-cyanAccent"
+            >
+              {Object.entries(rates).map(([code, cfg]) => (
+                <option key={code} value={code}>
+                  {code} ({cfg.symbol}) - {cfg.name}
+                </option>
+              ))}
+            </select>
+            <span className="text-[11px] text-slate-500">
+              {fileCurrency !== 'USD' ? `Charges will be converted from ${fileCurrency} to USD for scoring.` : 'Standard USD baseline.'}
+            </span>
+          </div>
 
           <div className="mt-4 flex items-center gap-3">
             <label className="cursor-pointer">
@@ -200,12 +221,12 @@ export default function Batch() {
                 {loading ? (
                   <>
                     <RefreshCw className="h-4 w-4 animate-spin text-navy-950" />
-                    Executing Model Batch...
+                    Scoring Batch Records...
                   </>
                 ) : (
                   <>
                     <FileCheck className="h-4 w-4" />
-                    Execute Batch Scoring
+                    Score Batch File
                   </>
                 )}
               </Button>
@@ -315,7 +336,7 @@ export default function Batch() {
                         {row['Tenure Months'] ?? row.tenure ?? 'N/A'}m
                       </td>
                       <td className="py-3 px-4 font-mono text-slate-200">
-                        ${Number(row['Monthly Charges'] ?? row.MonthlyCharges ?? 0).toFixed(2)}
+                        {formatMoney(row['Monthly Charges'] ?? row.MonthlyCharges ?? 0)}
                       </td>
                     </tr>
                   ))}

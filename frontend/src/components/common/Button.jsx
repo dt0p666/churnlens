@@ -13,7 +13,7 @@ export default function Button({
   const variantStyles = {
     primary: 'bg-cyanAccent hover:bg-cyanAccent-light text-navy-950 font-bold shadow-cyan-glow focus:ring-cyanAccent',
     secondary: 'bg-navy-850 hover:bg-navy-800 text-slate-200 border border-navy-750 focus:ring-navy-700',
-    ghost: 'bg-transparent hover:bg-navy-800 text-slate-300 hover:text-white focus:ring-navy-700',
+    ghost: 'bg-transparent hover:bg-navy-800 text-slate-300 hover:text-slate-100 focus:ring-navy-700',
     danger: 'bg-rose-500/20 hover:bg-rose-500/30 text-rose-300 border border-rose-500/30 focus:ring-rose-500',
   };
 

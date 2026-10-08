@@ -1,46 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../services/api';
-import { Menu, Database, ShieldCheck, Activity } from 'lucide-react';
+import { useCurrency } from '../context/CurrencyContext';
+import { Menu, Activity, Coins } from 'lucide-react';
+import ChurnLensLogo from './common/ChurnLensLogo';
 
 export default function Header({ onMenuClick = () => {} }) {
-  const [online, setOnline] = useState(false);
   const [modelVersion, setModelVersion] = useState('v1.0.0');
+  const { currency, setCurrency, rates } = useCurrency();
 
   useEffect(() => {
     api.getHealth()
       .then((data) => {
-        setOnline(data.status === 'healthy');
         if (data.version) setModelVersion(data.version);
       })
-      .catch(() => setOnline(false));
+      .catch(() => {});
   }, []);
 
   return (
-    <header className="h-16 px-6 border-b border-navy-800 bg-navy-950/70 backdrop-blur-md flex items-center justify-between flex-shrink-0 z-20">
+    <header className="h-16 px-4 sm:px-6 border-b border-navy-800 bg-navy-950/70 backdrop-blur-md flex items-center justify-between flex-shrink-0 z-20">
       <div className="flex items-center gap-3">
         <button
           onClick={onMenuClick}
-          className="p-2 rounded-lg text-slate-400 hover:text-white hover:bg-navy-850 md:hidden transition-colors"
+          className="p-2 rounded-lg text-slate-400 hover:text-slate-100 hover:bg-navy-850 md:hidden transition-colors"
           aria-label="Open Navigation Menu"
         >
           <Menu className="h-5 w-5" />
         </button>
-        <span className="text-xs font-mono font-medium text-slate-400 hidden sm:inline-block">
-          CHURNLENS <span className="text-slate-600">/</span> ENTERPRISE RADAR
-        </span>
+        {/* Mobile-only brand display */}
+        <div className="md:hidden">
+          <ChurnLensLogo size={26} color="#4A2E1B" accentColor="#D4A373" />
+        </div>
       </div>
 
-      <div className="flex items-center gap-3">
-        {/* Model Version Pill */}
-        <div className="flex items-center gap-1.5 px-3 py-1 rounded-full bg-navy-900 border border-navy-750 text-xs font-mono text-slate-300">
-          <Activity className="h-3.5 w-3.5 text-cyanAccent" />
-          <span>{modelVersion}</span>
+      <div className="flex items-center gap-2.5 sm:gap-3">
+        {/* Currency Selector Dropdown */}
+        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-navy-900 border border-navy-800 text-xs font-mono">
+          <Coins className="h-3.5 w-3.5 text-cyanAccent" />
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="bg-transparent text-slate-200 font-bold focus:outline-none cursor-pointer pr-1"
+            title="Display Currency (Converted from Base USD)"
+          >
+            {Object.entries(rates).map(([code, cfg]) => (
+              <option key={code} value={code} className="bg-navy-900 text-slate-200">
+                {cfg.symbol} {code}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* API Health Pill */}
-        <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-navy-900 border border-navy-750 text-xs font-mono">
-          <span className={`h-2 w-2 rounded-full ${online ? 'bg-cyanAccent animate-pulse shadow-[0_0_8px_#22D3EE]' : 'bg-amber-400'}`} />
-          <span className="text-slate-300">{online ? 'API ONLINE' : 'STANDBY'}</span>
+        {/* Model Version Badge */}
+        <div className="flex items-center gap-1.5 px-3 py-1 rounded-md bg-navy-900 border border-navy-800 text-xs font-mono text-slate-300">
+          <Activity className="h-3.5 w-3.5 text-cyanAccent" />
+          <span>{modelVersion}</span>
         </div>
       </div>
     </header>

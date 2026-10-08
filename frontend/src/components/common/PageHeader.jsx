@@ -1,6 +1,3 @@
-import React from 'react';
-import RadarLens from './RadarLens';
-
 export default function PageHeader({
   title,
   subtitle,
@@ -13,12 +10,11 @@ export default function PageHeader({
     <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-navy-800/60">
       <div>
         <div className="flex items-center gap-2.5">
-          <RadarLens size={20} />
-          <h1 className="text-xl sm:text-2xl font-bold font-heading text-white tracking-tight">
+          <h1 className="text-xl sm:text-2xl font-bold font-heading text-slate-100 tracking-tight">
             {title}
           </h1>
           {badge && (
-            <span className="text-[10px] uppercase font-mono font-semibold px-2 py-0.5 rounded-full bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/30">
+            <span className="text-[10px] uppercase font-mono font-semibold px-2 py-0.5 rounded-md bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/30">
               {badge}
             </span>
           )}

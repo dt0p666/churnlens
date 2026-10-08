@@ -20,7 +20,7 @@ export default function MetricCard({ title, value, subtitle, icon: Icon, trend, 
       </div>
 
       <div className="flex items-baseline gap-2">
-        <span className="text-2xl font-bold tracking-tight text-white">{value}</span>
+        <span className="text-2xl font-bold tracking-tight text-slate-100">{value}</span>
         {trend && (
           <span className={`text-xs font-semibold ${trend > 0 ? 'text-rose-400' : 'text-emerald-400'}`}>
             {trend > 0 ? '+' : ''}{trend}%

@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import RadarLens from './common/RadarLens';
+import ChurnLensLogo from './common/ChurnLensLogo';
 import { 
   LayoutDashboard, 
   Users, 
@@ -34,16 +34,10 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
         }`}
       >
         {/* Brand Header */}
-        <div className="h-16 px-6 flex items-center justify-between border-b border-navy-800 bg-navy-950/40">
-          <div className="flex items-center gap-3">
-            <RadarLens size={24} />
-            <div>
-              <h1 className="font-heading font-bold text-base tracking-tight text-white flex items-center gap-1">
-                CHURN<span className="text-cyanAccent">LENS</span>
-              </h1>
-              <p className="text-[9px] text-slate-400 font-mono tracking-widest uppercase">The Churn Radar</p>
-            </div>
-          </div>
+        <div className="h-16 px-5 flex items-center justify-between border-b border-navy-800 bg-navy-950/40">
+          <NavLink to="/" className="flex items-center hover:opacity-90 transition-opacity">
+            <ChurnLensLogo size={32} color="#4A2E1B" accentColor="#D4A373" />
+          </NavLink>
         </div>
 
         {/* Navigation List */}
@@ -56,10 +50,10 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
                 to={item.to}
                 onClick={onClose}
                 className={({ isActive }) =>
-                  `flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-medium transition-all duration-200 ${
+                  `flex items-center justify-between px-3 py-2.5 rounded-lg text-xs transition-all duration-150 ${
                     isActive
-                      ? 'bg-cyanAccent/10 text-cyanAccent border border-cyanAccent/30 shadow-inner-glow'
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-navy-850'
+                      ? 'bg-navy-800/60 text-[#4A2E1B] font-bold border border-navy-800 shadow-sm'
+                      : 'text-slate-400 hover:text-slate-100 hover:bg-navy-800/30 font-medium'
                   }`
                 }
               >
@@ -68,7 +62,7 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
                   <span>{item.label}</span>
                 </div>
                 {item.badge && (
-                  <span className="text-[9px] font-mono uppercase font-semibold px-1.5 py-0.5 rounded bg-cyanAccent/15 text-cyanAccent">
+                  <span className="text-[9px] font-mono uppercase font-semibold px-1.5 py-0.5 rounded bg-navy-800/80 text-[#4A2E1B] border border-navy-800">
                     {item.badge}
                   </span>
                 )}
@@ -76,20 +70,6 @@ export default function Sidebar({ isOpen = true, onClose = () => {} }) {
             );
           })}
         </nav>
-
-        {/* Model Spec Footer */}
-        <div className="p-4 border-t border-navy-800 bg-navy-950/60">
-          <div className="flex items-center justify-between text-xs">
-            <span className="font-mono text-slate-400">Model v1.0.0</span>
-            <span className="inline-flex items-center gap-1.5 text-emerald-400 font-mono text-[11px] font-medium">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              ACTIVE
-            </span>
-          </div>
-          <p className="text-[10px] font-mono text-slate-500 mt-1 truncate">
-            XGBoost &bull; ROC-AUC 0.854
-          </p>
-        </div>
       </aside>
 
       {/* Backdrop for mobile drawer */}

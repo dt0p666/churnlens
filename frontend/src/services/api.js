@@ -85,4 +85,14 @@ export const api = {
     });
     return res.data;
   },
+
+  getRiskMap: async () => {
+    const res = await client.get('/analytics/risk-map');
+    return res.data;
+  },
+
+  getTopRiskFeed: async () => {
+    const res = await client.get('/analytics/top-risk-feed');
+    return res.data;
+  },
 };

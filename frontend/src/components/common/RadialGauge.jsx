@@ -6,17 +6,17 @@ export default function RadialGauge({ value = 0, size = 180, label = 'Churn Risk
   const pct = value > 1 ? Math.min(100, Math.max(0, value)) : Math.min(100, Math.max(0, value * 100));
 
   // Determine color by risk tier
-  let color = '#10B981'; // emerald
-  let glowColor = 'rgba(16, 185, 129, 0.3)';
+  let color = '#15803D'; // warm forest/olive
+  let glowColor = 'rgba(21, 128, 61, 0.2)';
   let riskText = 'LOW';
 
   if (pct >= 60) {
-    color = '#F43F5E'; // rose/coral
-    glowColor = 'rgba(244, 63, 94, 0.4)';
+    color = '#DC2626'; // warm crimson
+    glowColor = 'rgba(220, 38, 38, 0.2)';
     riskText = 'HIGH';
   } else if (pct >= 35) {
-    color = '#F59E0B'; // amber
-    glowColor = 'rgba(245, 158, 11, 0.4)';
+    color = '#D97706'; // warm amber
+    glowColor = 'rgba(217, 119, 6, 0.2)';
     riskText = 'MEDIUM';
   }
 
@@ -37,7 +37,7 @@ export default function RadialGauge({ value = 0, size = 180, label = 'Churn Risk
           cy={size / 2}
           r={radius}
           fill="none"
-          stroke="#15223C"
+          stroke="#E9EDC9"
           strokeWidth={strokeWidth}
           strokeDasharray={`${arcLength} ${circumference}`}
           strokeLinecap="round"
@@ -56,14 +56,14 @@ export default function RadialGauge({ value = 0, size = 180, label = 'Churn Risk
           animate={{ strokeDashoffset: offset }}
           transition={{ duration: 0.8, ease: 'easeOut' }}
           strokeLinecap="round"
-          style={{ filter: `drop-shadow(0 0 8px ${glowColor})` }}
+          style={{ filter: `drop-shadow(0 0 6px ${glowColor})` }}
         />
       </svg>
 
       {/* Center Readout */}
       <div className="absolute inset-0 flex flex-col items-center justify-center text-center mt-2">
         <motion.span
-          className="text-3xl font-extrabold font-mono tracking-tight text-white"
+          className="text-3xl font-extrabold font-mono tracking-tight text-slate-100"
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.5 }}

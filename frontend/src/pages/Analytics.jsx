@@ -87,7 +87,7 @@ export default function Analytics() {
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={formatBarData(data?.contracts)} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} vertical={false} />
                 <XAxis dataKey="name" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <YAxis unit="%" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip
@@ -121,7 +121,7 @@ export default function Analytics() {
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={formatBarData(data?.internet_services)} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} vertical={false} />
                 <XAxis dataKey="name" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <YAxis unit="%" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip
@@ -139,7 +139,7 @@ export default function Analytics() {
                 />
                 <Bar dataKey="rate" radius={[4, 4, 0, 0]}>
                   {formatBarData(data?.internet_services).map((entry, idx) => (
-                    <Cell key={idx} fill={entry.name === 'Fiber optic' ? '#F43F5E' : '#22D3EE'} />
+                    <Cell key={idx} fill={entry.name === 'Fiber optic' ? '#F43F5E' : '#D4A373'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -155,7 +155,7 @@ export default function Analytics() {
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={formatBarData(data?.payment_methods)} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} vertical={false} />
                 <XAxis dataKey="name" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 9, fontFamily: 'JetBrains Mono' }} interval={0} />
                 <YAxis unit="%" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip
@@ -173,7 +173,7 @@ export default function Analytics() {
                 />
                 <Bar dataKey="rate" radius={[4, 4, 0, 0]}>
                   {formatBarData(data?.payment_methods).map((entry, idx) => (
-                    <Cell key={idx} fill={entry.name === 'Electronic check' ? '#F43F5E' : '#8B5CF6'} />
+                    <Cell key={idx} fill={entry.name === 'Electronic check' ? '#F43F5E' : '#CCD5AE'} />
                   ))}
                 </Bar>
               </BarChart>
@@ -189,7 +189,7 @@ export default function Analytics() {
           <div className="h-60 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <BarChart data={formatBarData(data?.tenure_cohorts, 'cohort')} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#1E293B" vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" stroke="#CCD5AE" strokeOpacity={0.6} vertical={false} />
                 <XAxis dataKey="name" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <YAxis unit="%" stroke="#64748B" tick={{ fill: '#94A3B8', fontSize: 11, fontFamily: 'JetBrains Mono' }} />
                 <Tooltip

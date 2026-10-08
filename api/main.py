@@ -4,7 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from api.database import init_db
-from api.routes import health, model, prediction, batch, explain, analytics, whatif, business, monitoring
+from api.routes import health, model, prediction, batch, explain, analytics, whatif, business, monitoring, currency
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -19,11 +19,12 @@ app = FastAPI(
     lifespan=lifespan
 )
 
-# CORS configuration
-origins = os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173").split(",")
+# CORS configuration (permits local development, custom domains, and Vercel deployments)
+origins = [o.strip() for o in os.getenv("CORS_ORIGINS", "http://localhost:5173,http://localhost:3000,http://127.0.0.1:5173").split(",") if o.strip()]
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"^https://.*\.vercel\.app$",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -39,6 +40,7 @@ app.include_router(analytics.router)
 app.include_router(whatif.router)
 app.include_router(business.router)
 app.include_router(monitoring.router)
+app.include_router(currency.router)
 
 if __name__ == "__main__":
     import uvicorn
