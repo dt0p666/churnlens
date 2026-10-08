@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: churnlens-api
+    runtime: docker
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: ENVIRONMENT
+        value: production
+      - key: CORS_ORIGINS
+        value: https://churnlens-eta.vercel.app,http://localhost:5173
