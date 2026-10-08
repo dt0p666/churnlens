@@ -1,7 +1,16 @@
 import React from 'react';
 
-export default function Badge({ tier = 'LOW', size = 'md' }) {
-  const norm = (tier || 'LOW').toUpperCase();
+export default function Badge({ tier, variant, size = 'md', children }) {
+  const raw = (tier || variant || 'LOW').toString().toUpperCase();
+  const norm = raw.includes('HIGH')
+    ? 'HIGH'
+    : raw.includes('MED')
+    ? 'MEDIUM'
+    : raw.includes('LOW')
+    ? 'LOW'
+    : raw === 'INVALID'
+    ? 'INVALID'
+    : 'LOW';
 
   const configs = {
     HIGH: {
@@ -23,7 +32,7 @@ export default function Badge({ tier = 'LOW', size = 'md' }) {
       bg: 'bg-slate-500/10 text-slate-400 border-slate-500/30',
       dot: 'bg-slate-400',
       label: 'INVALID',
-    }
+    },
   };
 
   const current = configs[norm] || configs.LOW;
@@ -32,7 +41,7 @@ export default function Badge({ tier = 'LOW', size = 'md' }) {
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-md font-mono font-semibold border ${sizeClasses} ${current.bg}`}>
       <span className={`h-1.5 w-1.5 rounded-full animate-pulse ${current.dot}`}></span>
-      {current.label}
+      {children || current.label}
     </span>
   );
 }

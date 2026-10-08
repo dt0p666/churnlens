@@ -1,20 +1,28 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 
-export default function RadialGauge({ value = 0, size = 180, label = 'Churn Risk', showLabel = true }) {
+export default function RadialGauge({
+  value = 0,
+  size = 180,
+  label = 'Churn Risk',
+  showLabel = true,
+  riskTier = null,
+}) {
   // Value is expected 0 to 1 (or 0 to 100)
   const pct = value > 1 ? Math.min(100, Math.max(0, value)) : Math.min(100, Math.max(0, value * 100));
 
-  // Determine color by risk tier
+  // Use authoritative riskTier from model API if provided, otherwise compute from threshold boundaries
+  const tier = (riskTier || (pct >= 60 ? 'HIGH' : pct >= 35 ? 'MEDIUM' : 'LOW')).toUpperCase();
+
   let color = '#15803D'; // warm forest/olive
   let glowColor = 'rgba(21, 128, 61, 0.2)';
   let riskText = 'LOW';
 
-  if (pct >= 60) {
+  if (tier.includes('HIGH')) {
     color = '#DC2626'; // warm crimson
     glowColor = 'rgba(220, 38, 38, 0.2)';
     riskText = 'HIGH';
-  } else if (pct >= 35) {
+  } else if (tier.includes('MED')) {
     color = '#D97706'; // warm amber
     glowColor = 'rgba(217, 119, 6, 0.2)';
     riskText = 'MEDIUM';

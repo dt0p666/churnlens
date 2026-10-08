@@ -166,6 +166,13 @@ export default function WhatIf() {
         }
       />
 
+      {error && (
+        <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center gap-3 text-rose-400 text-xs font-mono">
+          <AlertTriangle className="h-4 w-4 flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {/* Flagship Side-by-Side Dual Gauges */}
       <Card className="p-6 relative overflow-hidden bg-navy-900/80 backdrop-blur-md border border-navy-750">
         {changedFields.length > 0 && (
@@ -193,14 +200,14 @@ export default function WhatIf() {
             </span>
             <div className="my-2">
               <RadialGauge
-                value={simResult ? simResult.baseline_probability : 0.5}
-                riskTier={simResult ? simResult.baseline_risk_tier : 'MEDIUM'}
+                value={simResult ? simResult.baseline_probability : 0}
+                riskTier={simResult?.baseline_risk_tier}
                 size={190}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <Badge variant={simResult?.baseline_risk_tier?.toLowerCase() || 'medium'}>
-                {simResult?.baseline_risk_tier || 'CALCULATING'}
+              <Badge tier={simResult?.baseline_risk_tier}>
+                {simResult?.baseline_risk_tier || (loading ? 'CALCULATING' : 'STANDBY')}
               </Badge>
               <span className="text-xs font-mono text-slate-400">
                 Baseline Risk
@@ -252,14 +259,14 @@ export default function WhatIf() {
             </span>
             <div className="my-2">
               <RadialGauge
-                value={simResult ? simResult.simulated_probability : 0.5}
-                riskTier={simResult ? simResult.simulated_risk_tier : 'MEDIUM'}
+                value={simResult ? simResult.simulated_probability : 0}
+                riskTier={simResult?.simulated_risk_tier}
                 size={190}
               />
             </div>
             <div className="flex items-center gap-2 mt-2">
-              <Badge variant={simResult?.simulated_risk_tier?.toLowerCase() || 'medium'}>
-                {simResult?.simulated_risk_tier || 'CALCULATING'}
+              <Badge tier={simResult?.simulated_risk_tier}>
+                {simResult?.simulated_risk_tier || (loading ? 'CALCULATING' : 'STANDBY')}
               </Badge>
               <span className="text-xs font-mono text-slate-400">
                 Projected Risk
